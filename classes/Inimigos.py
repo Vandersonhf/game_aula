@@ -19,5 +19,8 @@ def update_enemies(pygame, janela, bola, blocos):
         # mudando a cor da bola caso colida com algum bloco
         mudarCor = bola['objRect'].colliderect(bloco['objRect'])
         if mudarCor:
-            bola['cor'] = bloco['cor']
+            bola['cor'] = bloco['cor']      # troca cor
+            bola['vel'] = [-bola['vel'][0], -bola['vel'][1]]    #inverte movimento bola
+            bloco['vel'] = [-bloco['vel'][0], -bloco['vel'][1]] #inverte mov. bloco
+            #blocos.remove(bloco)    # mata o inimigo?
         
