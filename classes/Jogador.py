@@ -1,3 +1,4 @@
+import pygame
 from config.Constantes import *
 
 # definindo a função mover(), que registra a posição de um jogador
@@ -16,9 +17,10 @@ def moverJogador(jogador, teclas, dim_janela):
     if teclas['baixo'] and jogador['objRect'].bottom < borda_inferior:
         jogador['objRect'].y += jogador['vel']
       
-def get_player(pygame):    
+def get_player():    
     ## criando jogador
-    jogador = {'objRect': pygame.Rect(300, 100, 50, 50), 'cor': VERDE, 'vel': VEL}
+    jogador = {'objRect': pygame.Rect(300,100,LARGURATUBARAO,ALTURATUBARAO),
+               'imagem': imagemTubarao, 'vel': VEL}
     return jogador
 
 def get_teclas():
@@ -27,14 +29,16 @@ def get_teclas():
     return teclas
 
 
-def update_player(pygame, janela, jogador, teclas, blocos):
+def update_player(janela, jogador, teclas, peixes):
     # movendo o jogador
-    moverJogador(jogador, teclas, (LARGURAJANELA, ALTURAJANELA))
+    moverJogador(jogador, teclas, (LARGURAJANELA, ALTURAJANELA))    
     # desenhando jogador
-    pygame.draw.rect(janela, jogador['cor'], jogador['objRect'])
+    janela.blit(jogador['imagem'], jogador['objRect'])
     
-    # checando se jogador bateu em algum bloco ou se bloco saiu da janela para retirá-lo da lista
-    for bloco in blocos[:]:
-        bateu = jogador['objRect'].colliderect(bloco['objRect'])
-        if bateu or bloco['objRect'].y > ALTURAJANELA:
-            blocos.remove(bloco)
+    # checando se jogador comeu algum peixe ou se o peixe saiu da janela para retirá-lo da lista
+    for peixe in peixes[:]:
+        comeu = jogador['objRect'].colliderect(peixe['objRect'])
+        if comeu and somAtivado:
+            somComer.play()
+        if comeu or peixe['objRect'].x > LARGURAJANELA:
+            peixes.remove(peixe)

@@ -3,17 +3,15 @@ from .Display import *
 from classes.Inimigos import *
 from classes.Jogador import *
    
-def run(pygame):
+def run():
     # cria nova janela
-    window = create_window(pygame)    
-    # criando um objeto pygame.time.Clock
-    relogio = pygame.time.Clock()
-    
+    window = create_window()    
+        
     # criar jogador
-    player = get_player(pygame)
+    player = get_player()
     
     #repetição principal
-    main_loop(pygame, window, relogio, player)
+    main_loop(window, player)
     
     
     

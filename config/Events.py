@@ -1,6 +1,7 @@
+import pygame
 from config.Constantes import *
 
-def trata_eventos(pygame,teclas,blocos):
+def trata_eventos(teclas,peixes):
     #print("Tratando...")
     for evento in pygame.event.get():
         # Se for um evento QUIT
@@ -20,7 +21,14 @@ def trata_eventos(pygame,teclas,blocos):
                 teclas['cima'] = True
             if evento.key == pygame.K_DOWN or evento.key == pygame.K_s:
                 teclas['baixo'] = True
-        
+            if evento.key == pygame.K_m:
+                if somAtivado:
+                    pygame.mixer.music.stop()
+                    somAtivado = False
+                else:
+                    pygame.mixer.music.play(-1, 0.0)
+                    somAtivado = True
+                        
         # quando uma tecla é solta
         if evento.type == pygame.KEYUP:
             if evento.key == pygame.K_LEFT or evento.key == pygame.K_a:
@@ -34,8 +42,8 @@ def trata_eventos(pygame,teclas,blocos):
         
         # quando um botao do mouse é pressionado
         if evento.type == pygame.MOUSEBUTTONDOWN:
-            blocos.append({'objRect': pygame.Rect(evento.pos[0], evento.pos[1],
-                        TAMANHOBLOCO, TAMANHOBLOCO), 'cor': BRANCO, 'vel': 1})
-        
+            peixes.append({'objRect': pygame.Rect(evento.pos[0], evento.pos[1],
+                        LARGURAPEIXE, ALTURAPEIXE), 'imagem': imagemPeixe, 'vel': VEL - 3})
+                            
     return True
 

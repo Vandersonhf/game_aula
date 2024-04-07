@@ -5,7 +5,7 @@ from config import *
 pygame.init()
 
 #iniciando o jogo
-run(pygame)
+run()
 
 # encerrando módulos de Pygame
 pygame.quit()
