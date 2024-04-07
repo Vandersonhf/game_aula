@@ -9,3 +9,6 @@ BRANCO = (255, 255, 255)
 # definindo outras constantes do jogo
 LARGURAJANELA = 500
 ALTURAJANELA = 400
+VEL = 6
+ITERACOES = 30
+TAMANHOBLOCO = 20

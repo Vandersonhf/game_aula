@@ -1,26 +1,27 @@
-from .Figura import *
 from config.Constantes import *
+import random
 
-def get_enemies(pygame):    
-    # criando os blocos e colocando-os em uma lista
-    b1 = {'objRect': pygame.Rect(375, 80, 40, 40), 'cor': VERMELHO, 'vel': [0,2]}
-    b2 = {'objRect': pygame.Rect(175, 200, 40, 40), 'cor': VERDE, 'vel': [0,-3]}
-    b3 = {'objRect': pygame.Rect(275, 150, 40, 40), 'cor': AMARELO, 'vel': [0,-1]}
-    b4 = {'objRect': pygame.Rect(75, 150, 40, 40), 'cor': AZUL, 'vel': [0,4]}
-    blocos = [b1, b2, b3, b4]
-    return blocos
+# definindo a função moverBloco(), que registra a posição do bloco
+def moverBloco(bloco):
+    bloco['objRect'].y += bloco['vel']
 
-def update_enemies(pygame, janela, bola, blocos):
+
+def set_enemies(pygame,blocos,contador):    
+    # criando os blocos e colocando-os em uma lista    
+    if contador >= ITERACOES:
+        # adicionando um novo bloco
+        contador = 0
+        posX = random.randint(0, LARGURAJANELA - TAMANHOBLOCO)
+        posY = -TAMANHOBLOCO
+        velRandom = random.randint(1, VEL + 3)
+        blocos.append({'objRect': pygame.Rect(posX, posY,
+                TAMANHOBLOCO, TAMANHOBLOCO), 'cor': BRANCO, 'vel': velRandom})
+    return contador
+    
+
+def update_enemies(pygame, janela, blocos):
+   # movendo e desenhando os blocos
     for bloco in blocos:
-        # reposicionando o bloco
-        mover(bloco, (LARGURAJANELA,ALTURAJANELA))
-        # desenhando o bloco na janela
+        moverBloco(bloco)
         pygame.draw.rect(janela, bloco['cor'], bloco['objRect'])
-        # mudando a cor da bola caso colida com algum bloco
-        mudarCor = bola['objRect'].colliderect(bloco['objRect'])
-        if mudarCor:
-            bola['cor'] = bloco['cor']      # troca cor
-            bola['vel'] = [-bola['vel'][0], -bola['vel'][1]]    #inverte movimento bola
-            bloco['vel'] = [-bloco['vel'][0], -bloco['vel'][1]] #inverte mov. bloco
-            #blocos.remove(bloco)    # mata o inimigo?
         
