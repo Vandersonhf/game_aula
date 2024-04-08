@@ -2,30 +2,47 @@ import pygame
 from config.Constantes import *
 import random
 
-# definindo a função moverBloco(), que registra a posição do peixe
-def _moverPeixe(peixe):
-    peixe['objRect'].x -= peixe['vel']
+# definindo a função mover
+def moverElemento(elemento):
+    elemento['objRect'].x += elemento['vel'][0]
+    elemento['objRect'].y += elemento['vel'][1]
 
-def set_enemies(peixes, spawn, level, ciclos):    
-    # criando os peixes e colocando-os em uma lista    
-    if spawn >= (ITERACOES/level) and ciclos < (CICLOS*level-INTERVAL):
-        # adicionando um novo peixe
-        spawn = 0
-        posY = random.randint(0, ALTURAJANELA - ALTURAPEIXE)
-        posX = LARGURAJANELA
-        velRandom = random.randint(VEL - 3, VEL + 3)
-        #aparecer 3 tipos de peixes
-        tipo = random.randint(1,3) if level == 3 else random.randint(1,2) if level == 2 else 1
-        imagemPeixe = imagemPeixe1 if tipo == 1 else imagemPeixe2 if tipo == 2 else imagemPeixe3
-        # tipo 1 peixe mais fácil de pegar
-        velRandom = velRandom-2 if tipo == 1 else velRandom+1 if tipo == 2 else velRandom+3
-        peixes.append({'objRect': pygame.Rect(posX, posY,LARGURAPEIXE,ALTURAPEIXE),
-                       'imagem': imagemPeixe, 'vel': velRandom, 'tipo': tipo})
-    return spawn
+def set_enemies(asteroides, contador):    
+    # Adicionando asteroides quando indicado.
+    contador += 1
+    if contador >= ITERACOES:
+        contador = 0
+        tamAsteroide = random.randint(TAMMINIMO, TAMMAXIMO)
+        posX = random.randint(0, LARGURAJANELA - tamAsteroide)
+        posY = - tamAsteroide
+        vel_x = random.randint(-1,1)
+        vel_y = random.randint(VELMINIMA, VELMAXIMA)
+        asteroide = {'objRect': pygame.Rect(posX, posY, tamAsteroide, tamAsteroide),
+                'imagem': pygame.transform.scale(imagemAsteroide, (tamAsteroide, tamAsteroide)),
+                'vel': (vel_x, vel_y)}
+        asteroides.append(asteroide)
+    return contador
     
-def update_enemies(janela, peixes):
-   # movendo e desenhando os peixes
-    for peixe in peixes:
-        _moverPeixe(peixe)
-        janela.blit(peixe['imagem'], peixe['objRect'])
+def update_enemies(janela, asteroides, raios):
+    # Movimentando e desenhando os asteroides.
+    for asteroide in asteroides:
+        moverElemento(asteroide)
+        janela.blit(asteroide['imagem'], asteroide['objRect'])
+        
+    # Eliminando os asteroides que passam pela base da janela.
+    for asteroide in asteroides[:]:
+        topo_asteroide = asteroide['objRect'].top
+        if topo_asteroide > ALTURAJANELA:
+            asteroides.remove(asteroide)
+    
+    # Movimentando e desenhando os raios.
+    for raio in raios:
+        moverElemento(raio)
+        janela.blit(raio['imagem'], raio['objRect'])
+        
+    #Eliminando os raios que passam pelo topo da janela.
+    for raio in raios[:]:
+        base_raio = raio['objRect'].bottom
+        if base_raio < 0:
+            raios.remove(raio)
         

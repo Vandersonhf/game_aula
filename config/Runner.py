@@ -1,47 +1,80 @@
 import pygame
-from .Events import trata_eventos
-from .Display import draw_background, new_level
+from .Events import trata_eventos, aguardarEntrada
+from .Display import draw_background, colocarTexto
 from .Constantes import *
 from classes.Inimigos import set_enemies, update_enemies
-from classes.Jogador import get_teclas, update_player
+from classes.Jogador import update_player, get_player
 
-def main_loop(janela, player):
-    # inicializando outras variáveis
-    spawn = 0
-    level = 1
-    ciclos = 0
-    peixes = []
-    deve_continuar = True
-    teclas = get_teclas()
-    points = 0
-    # criando um objeto pygame.time.Clock
-    relogio = pygame.time.Clock()
+def start(janela):
+    # Tela de inicio.
+    colocarTexto('Asteroides Troianos', fonte, janela, LARGURAJANELA / 5, ALTURAJANELA / 3)
+    colocarTexto('Pressione F1 para começar.', fonte, janela, LARGURAJANELA / 20 , ALTURAJANELA / 2)
+    pygame.display.update()
+    aguardarEntrada()
     
+    recorde = 0
+    while True:
+        # Configurando o começo do jogo.
+        asteroides = [] # lista com os asteroides
+        raios = [] # lista com os raios
+        pontuacao = 0 # pontuação
+        deve_continuar = True # indica se o loop do jogo deve continuar
+        
+        # direções de movimentação
+        teclas = {}
+        teclas['esquerda'] = teclas['direita'] = teclas['cima'] = teclas['baixo'] = False
+        contador = 0 # contador de iterações
+        pygame.mixer.music.play(-1, 0.0) # colocando a música de fundo
+        # criando um objeto pygame.time.Clock        
+        relogio = pygame.time.Clock()
+        
+        # criar jogador
+        jogador = get_player()
+        
+        #repetição principal
+        recorde = main_loop(janela, jogador, asteroides, raios, relogio,
+                  recorde, teclas, pontuacao, deve_continuar, contador)
+        
+        # Parando o jogo e mostrando a tela final.
+        pygame.mixer.music.stop()
+        somFinal.play()
+        colocarTexto('GAME OVER', fonte, janela, (LARGURAJANELA / 3), (ALTURAJANELA / 3))
+        colocarTexto('Pressione F1 para jogar.', fonte, janela, (LARGURAJANELA / 10), (ALTURAJANELA / 2))
+        pygame.display.update()
+        # Aguardando entrada por teclado para reiniciar o jogo ou sair.
+        aguardarEntrada()
+        somFinal.stop()
+        
+
+def main_loop(janela, jogador, asteroides, raios, relogio,
+              recorde, teclas, pontuacao, deve_continuar, contador):
     while deve_continuar:
+        pontuacao += 1        
+            
+        # preenchendo o fundo de janela com a sua imagem
+        draw_background(janela, pontuacao, recorde)
+        
         #verifica evetos e atualiza em memória       
-        deve_continuar = trata_eventos(teclas,peixes)
+        deve_continuar = trata_eventos(teclas,jogador,raios)
         
         #criar inimigos
-        spawn += 1; ciclos += 1        
-        spawn = set_enemies(peixes, spawn, level, ciclos)
+        contador += 1;        
+        contador = set_enemies(asteroides, contador) 
+        #atualiza inimigos
+        update_enemies(janela, asteroides, raios) 
         
-        # preenchendo o fundo de janela com a sua imagem
-        draw_background(janela, points)
-        
-        #nova fase
-        level = new_level(janela, level, ciclos)
-        if ciclos >= (CICLOS*3)+INTERVAL:
-            deve_continuar = False
-                        
         #atualiza jogador      
-        points = update_player(janela, player, teclas, peixes, points)
-        #atualiza peixes
-        update_enemies(janela, peixes) 
+        deve_continuar = update_player(janela, jogador, teclas, asteroides,
+                                       raios)
+        if not deve_continuar and pontuacao > recorde:
+            recorde = pontuacao
+        if pontuacao == recorde:
+            somRecorde.play()
         
         # mostrando na tela tudo o que foi desenhado
         pygame.display.update()        
         # limitando a 60 quadros por segundo
         relogio.tick(60)
-        
+    return recorde
        
-        
+       

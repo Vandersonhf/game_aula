@@ -2,7 +2,7 @@ import pygame
 from config.Constantes import *
 
 # definindo a função mover(), que registra a posição de um jogador
-def _moverJogador(jogador, teclas, dim_janela):
+def moverJogador(jogador, teclas, dim_janela):
     borda_esquerda = 0
     borda_superior = 0
     borda_direita = dim_janela[0]
@@ -18,9 +18,11 @@ def _moverJogador(jogador, teclas, dim_janela):
         jogador['objRect'].y += jogador['vel']
       
 def get_player():    
-    ## criando jogador
-    jogador = {'objRect': pygame.Rect(300,100,LARGURATUBARAO,ALTURATUBARAO),
-               'imagem': imagemTubarao, 'vel': VEL}
+    # Criando jogador.
+    posX = LARGURAJANELA / 2
+    posY = ALTURAJANELA - 50
+    jogador = {'objRect': pygame.Rect(posX, posY, LARGURANAVE, ALTURANAVE),
+               'imagem': imagemNave, 'vel': VELJOGADOR}
     return jogador
 
 def get_teclas():
@@ -29,26 +31,19 @@ def get_teclas():
     return teclas
 
 
-def update_player(janela, jogador, teclas, peixes, points):
-    # movendo o jogador
-    _moverJogador(jogador, teclas, (LARGURAJANELA, ALTURAJANELA))    
-    # desenhando jogador
+def update_player(janela, jogador, teclas, asteroides, raios):
+    # Movimentando e desenhando jogador(nave).
+    moverJogador(jogador, teclas, (LARGURAJANELA, ALTURAJANELA))
     janela.blit(jogador['imagem'], jogador['objRect'])
-    
-    # checando se jogador comeu algum peixe ou se o peixe saiu da janela para retirá-lo da lista
-    for peixe in peixes[:]:
-        comeu = jogador['objRect'].colliderect(peixe['objRect'])
-        if comeu and somAtivado:
-            # som e pontuação diferentes
-            if peixe['tipo'] == 1:
-                somComer1.play()
-                points += 10
-            elif peixe['tipo'] == 2:
-                somComer2.play()
-                points += 30
-            else:
-                somComer3.play()
-                points += 50
-        if comeu or peixe['objRect'].x > LARGURAJANELA or (peixe['objRect'].x < 0):
-            peixes.remove(peixe)
-    return points
+    # Checando se jogador ou algum raio colidiu com algum asteroide.
+    for asteroide in asteroides[:]:
+        jogadorColidiu = jogador['objRect'].colliderect(asteroide['objRect'])
+        if jogadorColidiu:            
+            return False
+        for raio in raios[:]:
+            raioColidiu = raio['objRect'].colliderect(asteroide['objRect'])
+            if raioColidiu:
+                raios.remove(raio)
+                asteroides.remove(asteroide)
+    return True
+
