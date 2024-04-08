@@ -1,15 +1,19 @@
 import pygame
-from .Events import *
+from .Events import trata_eventos
+from .Display import draw_background, new_level
 from .Constantes import *
-from classes.Inimigos import *
-from classes.Jogador import *
+from classes.Inimigos import set_enemies, update_enemies
+from classes.Jogador import get_teclas, update_player
 
 def main_loop(janela, player):
     # inicializando outras variáveis
-    contador = 0
+    spawn = 0
+    level = 1
+    ciclos = 0
     peixes = []
     deve_continuar = True
     teclas = get_teclas()
+    points = 0
     # criando um objeto pygame.time.Clock
     relogio = pygame.time.Clock()
     
@@ -18,14 +22,19 @@ def main_loop(janela, player):
         deve_continuar = trata_eventos(teclas,peixes)
         
         #criar inimigos
-        contador += 1
-        contador = set_enemies(peixes,contador)
+        spawn += 1; ciclos += 1        
+        spawn = set_enemies(peixes, spawn, level, ciclos)
         
         # preenchendo o fundo de janela com a sua imagem
-        janela.blit(imagemFundo, (-1000,-1000))
+        draw_background(janela, points)
+        
+        #nova fase
+        level = new_level(janela, level, ciclos)
+        if ciclos >= (CICLOS*3)+INTERVAL:
+            deve_continuar = False
                         
         #atualiza jogador      
-        update_player(janela, player, teclas, peixes)
+        points = update_player(janela, player, teclas, peixes, points)
         #atualiza peixes
         update_enemies(janela, peixes) 
         

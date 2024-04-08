@@ -43,7 +43,8 @@ def trata_eventos(teclas,peixes):
         # quando um botao do mouse é pressionado
         if evento.type == pygame.MOUSEBUTTONDOWN:
             peixes.append({'objRect': pygame.Rect(evento.pos[0], evento.pos[1],
-                        LARGURAPEIXE, ALTURAPEIXE), 'imagem': imagemPeixe, 'vel': VEL - 3})
+                        LARGURAPEIXE, ALTURAPEIXE), 'imagem': imagemPeixe1, 'vel': VEL - 3,
+                           'tipo': 1})
                             
     return True
 

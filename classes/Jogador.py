@@ -2,7 +2,7 @@ import pygame
 from config.Constantes import *
 
 # definindo a função mover(), que registra a posição de um jogador
-def moverJogador(jogador, teclas, dim_janela):
+def _moverJogador(jogador, teclas, dim_janela):
     borda_esquerda = 0
     borda_superior = 0
     borda_direita = dim_janela[0]
@@ -29,9 +29,9 @@ def get_teclas():
     return teclas
 
 
-def update_player(janela, jogador, teclas, peixes):
+def update_player(janela, jogador, teclas, peixes, points):
     # movendo o jogador
-    moverJogador(jogador, teclas, (LARGURAJANELA, ALTURAJANELA))    
+    _moverJogador(jogador, teclas, (LARGURAJANELA, ALTURAJANELA))    
     # desenhando jogador
     janela.blit(jogador['imagem'], jogador['objRect'])
     
@@ -39,6 +39,16 @@ def update_player(janela, jogador, teclas, peixes):
     for peixe in peixes[:]:
         comeu = jogador['objRect'].colliderect(peixe['objRect'])
         if comeu and somAtivado:
-            somComer.play()
-        if comeu or peixe['objRect'].x > LARGURAJANELA:
+            # som e pontuação diferentes
+            if peixe['tipo'] == 1:
+                somComer1.play()
+                points += 10
+            elif peixe['tipo'] == 2:
+                somComer2.play()
+                points += 30
+            else:
+                somComer3.play()
+                points += 50
+        if comeu or peixe['objRect'].x > LARGURAJANELA or (peixe['objRect'].x < 0):
             peixes.remove(peixe)
+    return points
