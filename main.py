@@ -1,7 +1,8 @@
-from game.JogoNave import JogoNave
+import gameNave
 
 if __name__ == '__main__':
     '''inicialização do jogo'''
-            
-    game = JogoNave(60,True,'Asteroides')
-    game.run()
+    
+    # normal run        
+    game = gameNave.JogoNave(60,False,'Asteroides')
+    

@@ -10,7 +10,10 @@ class GameDisplay():
         root = tk.Tk()
         self.screen_width = root.winfo_screenwidth()
         self.screen_height = root.winfo_screenheight()
-        self.disp_size = (self.screen_width, self.screen_height)
+        if Fullscreen:
+            self.disp_size = (self.screen_width, self.screen_height)
+        else:
+            self.disp_size = (1280, 720)
         # disp_size = (1920, 1080) # disp_size = (1280, 720)  # disp_size = (720, 400)  # disp_size = (640, 360)
         
         self._setup_display()        

@@ -48,6 +48,12 @@ class Events():
                 centroX_jogador = player.objRect.centerx
                 centroY_jogador = player.objRect.centery
                 player.objRect.move_ip(evento.pos[0] - centroX_jogador, evento.pos[1] - centroY_jogador)
+                
+                # jet precisa acompanhar
+                centroX_jogador = player.objRect2.centerx
+                centroY_jogador = player.objRect2.centery - player.altura/2
+                player.objRect2.move_ip(evento.pos[0] - centroX_jogador, evento.pos[1] - centroY_jogador)
+                
             if evento.type == pygame.MOUSEBUTTONDOWN:
                 rect = pygame.Rect(player.objRect.centerx, player.objRect.top,
                                        largura_raio, altura_raio)                        

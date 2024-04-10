@@ -28,6 +28,7 @@ class JogoNave():
         self.VELMAXIMA = 8       # velocidade máxima do rock
         self.ITERACOES = 60      # número de iterações antes de criar um novo rock        
         
+        self.run()
           
     def run(self):
         # Tela de inicio.self.disp_size
