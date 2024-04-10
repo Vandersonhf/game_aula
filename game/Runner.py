@@ -1,14 +1,18 @@
 import pygame
 from .Events import trata_eventos, aguardarEntrada
-from .Display import draw_background, colocarTexto
+from .GameDisplay import draw_background, colocarTexto
 from .Constantes import *
 from classes.Inimigos import set_enemies, update_enemies
 from classes.Jogador import update_player, get_player
 
 def start(janela):
     # Tela de inicio.
-    colocarTexto('Asteroides Troianos', fonte, janela, LARGURAJANELA / 5, ALTURAJANELA / 3)
-    colocarTexto('Pressione F1 para começar.', fonte, janela, LARGURAJANELA / 20 , ALTURAJANELA / 2)
+    colocarTexto('Asteroides Troianos', fonte, janela,
+                (LARGURAJANELA / 2), (ALTURAJANELA / 2)-font_size, 'center')
+    colocarTexto('Pressione F1 para começar.', fonte, janela,
+                (LARGURAJANELA / 2), (ALTURAJANELA / 2)+font_size, 'center')
+    colocarTexto('Pressione ESC para sair.', fonte, janela,
+                     (LARGURAJANELA / 2), (ALTURAJANELA / 2)+font_size*2, 'center')
     pygame.display.update()
     aguardarEntrada()
     
@@ -37,9 +41,13 @@ def start(janela):
         
         # Parando o jogo e mostrando a tela final.
         pygame.mixer.music.stop()
-        somFinal.play()
-        colocarTexto('GAME OVER', fonte, janela, (LARGURAJANELA / 3), (ALTURAJANELA / 3))
-        colocarTexto('Pressione F1 para jogar.', fonte, janela, (LARGURAJANELA / 10), (ALTURAJANELA / 2))
+        somFinal.play()                
+        colocarTexto('GAME OVER', fonte, janela,
+                     (LARGURAJANELA / 2), (ALTURAJANELA / 2)-font_size, 'center')
+        colocarTexto('Pressione F1 para jogar.', fonte, janela,
+                     (LARGURAJANELA / 2), (ALTURAJANELA / 2)+font_size, 'center')
+        colocarTexto('Pressione ESC para sair.', fonte, janela,
+                     (LARGURAJANELA / 2), (ALTURAJANELA / 2)+font_size*2, 'center')
         pygame.display.update()
         # Aguardando entrada por teclado para reiniciar o jogo ou sair.
         aguardarEntrada()
@@ -67,8 +75,7 @@ def main_loop(janela, jogador, asteroides, raios, relogio,
         deve_continuar = update_player(janela, jogador, teclas, asteroides,
                                        raios)
         if not deve_continuar and pontuacao > recorde:
-            recorde = pontuacao
-        if pontuacao == recorde:
+            recorde = pontuacao        
             somRecorde.play()
         
         # mostrando na tela tudo o que foi desenhado

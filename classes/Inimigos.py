@@ -1,5 +1,5 @@
 import pygame
-from config.Constantes import *
+from game.Constantes import *
 import random
 
 # definindo a função mover

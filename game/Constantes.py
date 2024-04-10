@@ -1,4 +1,14 @@
 import pygame
+import tkinter as tk
+
+root = tk.Tk()
+screen_width = root.winfo_screenwidth()
+screen_height = root.winfo_screenheight()
+
+# disp_size = (1920, 1080)
+# disp_size = (1280, 720)
+# disp_size = (720, 400)
+# disp_size = (640, 360)
 
 # Carregando as imagens.
 imagemNave = pygame.image.load('images/nave.png')
@@ -6,8 +16,8 @@ imagemAsteroide = pygame.image.load('images/asteroid.png')
 imagemRaio = pygame.image.load('images/missil.png')
 imagemFundo = pygame.image.load('images/space.jpg')
  
-LARGURAJANELA = 600 # largura da janela
-ALTURAJANELA = 600 # altura da janela
+LARGURAJANELA = screen_width # largura da janela
+ALTURAJANELA = screen_height # altura da janela
 CORTEXTO = (255, 255, 255) # cor do texto (branca)
 QPS = 40 # quadros por segundo
 TAMMINIMO = 10 # tamanho mínimo do asteroide
@@ -27,7 +37,8 @@ ALTURARAIO = imagemRaio.get_height()
 imagemFundoRedim = pygame.transform.scale(imagemFundo,(LARGURAJANELA, ALTURAJANELA))
 
 # Configurando a fonte.
-fonte = pygame.font.Font(None, 48)
+font_size = 48
+fonte = pygame.font.Font(None, font_size)
 
 # Configurando o som.
 somFinal = pygame.mixer.Sound('sound/Raycast_lose.wav')

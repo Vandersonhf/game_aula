@@ -1,5 +1,5 @@
 import pygame
-from config.Constantes import *
+from game.Constantes import *
 
 # definindo a função mover(), que registra a posição de um jogador
 def moverJogador(jogador, teclas, dim_janela):

@@ -1,12 +1,7 @@
-import pygame
+from game.JogoNave import JogoNave
 
-# inicializando pygame
-pygame.init()
-
-from config import run
-#iniciando o jogo
-run()
-
-# encerrando módulos de Pygame
-pygame.quit()
-exit()
+if __name__ == '__main__':
+    '''inicialização do jogo'''
+            
+    game = JogoNave(60,True,'Asteroides')
+    game.run()
