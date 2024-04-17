@@ -1,0 +1,20 @@
+ - jogo asteroides nave no espaço
+ - a nave desvia dos asteroides e ganha ponto a medida que os destroi
+ - para cada asteroide grande 50 pontos, 30 para os médios e 20 para os pequenos
+ - quebra em 3 estágios  
+ - 3 níveis de dificuldade:> inicia em 1 e termina em 3 com chefe
+ - colisao com asteroide reduz a vida da nave em 1/3
+ - colisão dos tiros da nave chefe reduz a vida ada nave em 1/3
+ - a nave pode pegar equipamentos melhores na fase 2 e 3
+ - dois níveis de equipamento: 2 tiros e 3 tiros por vez
+ - apenas 1 tiro por segundo aprox.
+ - a velocidade dos asteroides é aleatório
+ - a velocidade do chefe aumenta com vida abaixo de 1/3
+
+
+ para P2
+ - criar interface gráfica para um menu decente
+ - guardar informações de pontuação, recorde em MySQL
+ - criar versão do jogo cooperativo e competitivo para 2 jogadores
+ - rede LAN apenas
+ - otimizar código/ performance 

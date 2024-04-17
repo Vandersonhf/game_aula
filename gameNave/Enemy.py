@@ -1,12 +1,18 @@
 import pygame
+from .Sprite import Sprite
+from .Display import Display
+from pygame import Surface
 
-class Enemy():    
-    def __init__(self, rect, image, speed):        
+class Enemy(Sprite):    
+    def __init__(self, surf:Surface, startx, starty, size, speed):        
+        super().__init__(surf, startx, starty, 1)
         # valor por objeto
         self.speed = speed
-        self.image = image
-        self.objRect = rect               
+        self.surf = pygame.transform.scale(self.surf, size)        
+        self.objRect = pygame.Rect(startx, starty, size[0], size[1])     #resize collision
         
+        self.mask = pygame.mask.from_surface(self.surf)
+        self.surf_mask = self.mask.to_surface()
         
     # definindo a função mover
     def move(self):
@@ -14,18 +20,13 @@ class Enemy():
         self.objRect.y += self.speed[1]
         
     
-    def update(self, window, disp_size, rocks):
-        # Movimentando e desenhando
-        for rock in rocks:
-            rock.move()
-            window.blit(rock.image, rock.objRect)
-            
-        # Eliminando os rocks que passam pela base da janela.
-        for rock in rocks[:]:
-            top_rock = rock.objRect.top
-            if top_rock > disp_size[1]:
-                rocks.remove(rock)
-        return rocks
+    def update(self, display:Display):        
+        self.move()   
+        self.draw(display.window)    
+        top_rock = self.objRect.top
+        if top_rock > display.disp_size[1]:
+            self.kill()
+        
         
     
     

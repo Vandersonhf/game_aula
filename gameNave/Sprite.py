@@ -1,20 +1,27 @@
 import pygame
+from pygame import Surface
 
 class Sprite(pygame.sprite.Sprite):
-    def __init__(self, image, startx, starty):
+    def __init__(self, surf:Surface, startx:int, starty:int, scale):
         super().__init__()
 
-        self.image = pygame.image.load(image)
-         # return a width and height of an image
-        self.size = self.image.get_size()               
-        #self.image.set_colorkey((255,255,255)) 
+        self.surf = surf  #load once in main game
+        #new scale
+        new_size = (self.surf.get_width()*scale, self.surf.get_height()*scale)
+        self.surf = pygame.transform.scale(self.surf, new_size)
         
-        self.rect = self.image.get_rect()
-        self.rect.center = [startx, starty]        
+        self.size = self.surf.get_size()
+        self.width = self.surf.get_width()
+        self.height = self.surf.get_height()
+        
+        self.objRect = pygame.Rect(startx, starty, self.width, self.height)               
 
     def update(self):
         pass
 
-    def draw(self, screen):        
-        # draw bigger image to screen at x,y position
-        screen.blit(self.image, self.rect)
+    def draw(self, window:Surface):        
+        # draw bigger surf to window at x,y position
+        window.blit(self.surf, self.objRect)
+        
+        #colisao debug
+        pygame.draw.rect(window,(255,255,255),self.objRect,2)
