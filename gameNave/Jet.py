@@ -4,7 +4,7 @@ from .Surfaces import Surfaces
 from .Display import Display
 
 class Jet(Sprite):    
-    def __init__(self, surfaces:Surfaces, startx, starty):
+    def __init__(self, surfaces:Surfaces, startx, starty, speed):
         super().__init__(surfaces[0], startx, starty, 1)
                                     
         self.fly_cycle = surfaces
@@ -13,7 +13,7 @@ class Jet(Sprite):
         self.jet_delay = 7
         self.objRect.center = (startx, starty+10)  # correct positioning 
         
-        self.speed = 5      # velocidade da nave           
+        self.speed = speed      # velocidade da nave           
   
            
     def update(self, display:Display):             

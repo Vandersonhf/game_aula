@@ -24,13 +24,16 @@ class Player(Sprite):
         self.cima = False
         self.baixo = False 
                                        
-        self.speed = 5      # velocidade da nave           
+        self.speed = 10      # velocidade da nave 
+        self.delay_rocket = 10
+        self.counter = 0        
                 
         self.rockets = pygame.sprite.Group()         # lista com os rockets
         self.components = pygame.sprite.Group()    # addons da nave
         
         # add jet component
-        self.components.add(Jet(self.surf_jets, self.objRect.centerx, self.objRect.bottom))
+        self.components.add(Jet(self.surf_jets, self.objRect.centerx, 
+                                self.objRect.bottom, self.speed))
                 
         # Inicializa posição.
         dx = self.objRect.centerx
@@ -44,11 +47,12 @@ class Player(Sprite):
         self.surf_mask = self.mask.to_surface()
                 
         #debug
-        self.components.add(Jet([self.surf_mask], self.objRect.centerx, self.objRect.centery-10))
+        self.components.add(Jet([self.surf_mask], self.objRect.centerx,
+                                self.objRect.centery-10, self.speed))
            
                
     # definindo a função mover(), que registra a posição de um jogador
-    def move(self):
+    def move(self):  
         self.borda_esquerda = 0
         self.borda_superior = 0
         self.borda_direita = self.disp_size[0]
@@ -71,8 +75,13 @@ class Player(Sprite):
             for comp in self.components:
                 comp.objRect.y += comp.speed
        
+        # atualiza posição mouse
+        pygame.mouse.set_pos(self.objRect.centerx, self.objRect.centery)
+        
         
     def update(self, rocks:list[Enemy]):
+        self.counter += 1
+        
         # Movimentando e desenhando jogador(nave).        
         self.move()
         self.draw(self.display.window)                        
@@ -98,6 +107,8 @@ class Player(Sprite):
     
          
     def new_rocket(self, rockets):
-        rocket = Rocket(self.surf_rocket, self.sounds, self.objRect.centerx, self.objRect.top)                    
-        self.rockets.add(rocket)
-        rocket.shoot()
+        if self.counter >= self.delay_rocket:
+            rocket = Rocket(self.surf_rocket, self.sounds, self.objRect.centerx, self.objRect.top)                    
+            self.rockets.add(rocket)
+            rocket.shoot()
+            self.counter = 0

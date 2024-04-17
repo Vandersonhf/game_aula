@@ -1,5 +1,6 @@
 import pygame
 import tkinter as tk
+import math
 
 class Display():
     def __init__(self, FPS:int, Fullscreen:bool, nome:str):
@@ -28,9 +29,15 @@ class Display():
         if self.fullscreen:
             self.toggle_fullscreen()
             
-        self.imagemFundo = pygame.image.load('images/space.jpg').convert_alpha()        
+        self.imagemFundo = pygame.image.load('images/space.jpg').convert()                     
         #redimensionando a imagem de fundo.
-        #self.imagemFundo = pygame.transform.scale(self.imagemFundo, self.disp_size)
+        self.imagemFundo = pygame.transform.scale(self.imagemFundo, self.disp_size)
+        
+        # create tiles
+        self.bg_height = self.imagemFundo.get_height()
+        self.bg_rect = self.imagemFundo.get_rect()
+        self.scroll = 0
+        self.tiles = 4 #math.ceil(self.screen_height / self.bg_height) +1    #buffer +1
         
         # Configurando a fonte.        
         self.font_size = 48
@@ -59,7 +66,18 @@ class Display():
 
     def draw_background(self, pontuacao, recorde):
         ''' Preenchendo o fundo da janela com a imagem correspondente.'''
-        self.window.blit(self.imagemFundo, (0,0))
+        self.window.blit(self.imagemFundo, (0,0))  # old
+        '''
+        # movendo o fundo
+        for i in range(0, self.tiles):
+            pos_y = i * self.bg_height + self.scroll
+            self.window.blit(self.imagemFundo, (0,-pos_y))
+        
+        # update scroll
+        self.scroll -= 5
+        if abs(self.scroll)  > self.bg_height: 
+            self.scroll = 0
+        '''
         # Colocando as pontuações.
         self.print('Pontuação: ' + str(pontuacao), 10, 0, 'topLeft')
         self.print('Recorde: ' + str(recorde), 10, 40, 'topLeft')
