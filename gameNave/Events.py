@@ -48,7 +48,7 @@ class Events():
                     comp.objRect.move_ip(evento.pos[0] - dx, evento.pos[1] - dy)
                                                 
             if evento.type == pygame.MOUSEBUTTONDOWN:
-                player.new_rocket(player.rockets)                         
+                player.new_rocket()                         
         return True
 
 

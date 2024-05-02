@@ -1,22 +1,23 @@
 import pygame
 from .Rocket import Rocket
 from .Sprite import Sprite
-from .Enemy import Enemy
+from .Rock import Rock
+from .Mob import Mob
 from .Jet import Jet
 from .Surfaces import Surfaces
 from .Sounds import Sounds
 from .Display import Display
 
 class Player(Sprite):
-    def __init__(self, surfaces:Surfaces, sounds:Sounds, startx, starty, display:Display):             
-        self.surf = surfaces.surf_ship
-        self.surf_rocket = surfaces.surf_rocket
-        self.surf_jets = surfaces.surf_jets # several surfaces
+    def __init__(self, surfs:Surfaces, sounds:Sounds, startx:int, starty:int, display:Display):             
+        self.surfs = surfs
+        self.surf_jets = surfs.surf_jets # several surfaces
         self.disp_size = display.disp_size 
         self.display = display
         self.sounds = sounds          
-        scale = 1 
-        super().__init__(self.surf, startx, starty, scale)     #call superclass
+        #scale = 1
+        new_size = (surfs.surf_ship.get_width()/5, surfs.surf_ship.get_height()/5)
+        super().__init__([surfs.surf_ship], (startx,starty), new_size)     #call superclass
        
         # teclas
         self.esquerda = False
@@ -32,8 +33,9 @@ class Player(Sprite):
         self.components = pygame.sprite.Group()    # addons da nave
         
         # add jet component
-        self.components.add(Jet(self.surf_jets, self.objRect.centerx, 
-                                self.objRect.bottom, self.speed))
+        new_size = (self.surf_jets[0].get_width()*2, self.surf_jets[0].get_height()*2)
+        self.components.add(Jet(self.surfs, self.objRect.centerx, 
+                                self.objRect.bottom, new_size, self.speed))
                 
         # Inicializa posição.
         dx = self.objRect.centerx
@@ -41,14 +43,10 @@ class Player(Sprite):
         self.objRect.move_ip(startx - dx, starty - dy)        
         for comp in self.components:
             comp.objRect.move_ip(startx - dx, starty - dy)
-            
-        #define mascara de colisao
-        self.mask = pygame.mask.from_surface(self.surf)
-        self.surf_mask = self.mask.to_surface()
                 
         #debug
-        self.components.add(Jet([self.surf_mask], self.objRect.centerx,
-                                self.objRect.centery-10, self.speed))
+        #self.components.add(Jet([self.surf_mask], self.objRect.centerx,
+        #                        self.objRect.centery-10, self.speed))
            
                
     # definindo a função mover(), que registra a posição de um jogador
@@ -79,36 +77,74 @@ class Player(Sprite):
         pygame.mouse.set_pos(self.objRect.centerx, self.objRect.centery)
         
         
-    def update(self, rocks:list[Enemy]):
-        self.counter += 1
-        
-        # Movimentando e desenhando jogador(nave).        
+    def update(self, rocks:list[Rock], mobs:list[Mob], score:int):
+        self.counter += 1        
+        # Movimentando a nave       
         self.move()
-        self.draw(self.display.window)                        
                 
+        #desenhando componentes e etc.
         self.components.update(self.display)
         self.rockets.update(self.display)
-                
+        
+        # desenhando jogador(nave). 
+        self.draw(self.display.window) 
+           
+        # verifica colisão
+        return self.check_collision(rocks, mobs, score)                
+            
+    
+    def check_collision(self, rocks:list[Rock], mobs:list[Mob], score:int):
         # Checando se jogador ou algum rocket colidiu com algum rock.
         for rock in rocks:
             jogadorColidiu = False
-            if self.objRect.colliderect(rock.objRect):
-                offset = (rock.objRect.x - self.objRect.x, rock.objRect.y - self.objRect.y)
-                jogadorColidiu = self.mask.overlap(rock.mask, offset)
-            if jogadorColidiu:            
-                return False
+            if not rock.exploded:
+                if self.objRect.colliderect(rock.objRect):
+                    offset = (rock.objRect.x - self.objRect.x, rock.objRect.y - self.objRect.y)
+                    jogadorColidiu = self.mask.overlap(rock.mask, offset)
+                if jogadorColidiu:  
+                    self.sounds.somExplosao_player.play()          
+                    return False, score
             rocket:Rocket
             for rocket in self.rockets:
-                rocketColidiu = rocket.objRect.colliderect(rock.objRect)
-                if rocketColidiu:
-                    self.rockets.remove(rocket)
-                    rocks.remove(rock)
-        return True
-    
+                if not rock.exploded:
+                    rocketColidiu = rocket.objRect.colliderect(rock.objRect)
+                    if rocketColidiu:
+                        rock.explode()                                   
+                        self.rockets.remove(rocket)
+                        score = score + 50
+                        
+        # Checando se jogador ou algum rocket colidiu com algum mob.
+        for mob in mobs:
+            jogadorColidiu = False
+            if not mob.exploded:
+                if self.objRect.colliderect(mob.objRect):
+                    offset = (mob.objRect.x - self.objRect.x, mob.objRect.y - self.objRect.y)
+                    jogadorColidiu = self.mask.overlap(mob.mask, offset)
+                if jogadorColidiu:  
+                    self.sounds.somExplosao_player.play()          
+                    return False, score
+            rocket:Rocket
+            for rocket in self.rockets:
+                if not mob.exploded:
+                    rocketColidiu = rocket.objRect.colliderect(mob.objRect)
+                    if rocketColidiu:
+                        mob.explode()                                   
+                        self.rockets.remove(rocket)
+                        score = score + 100
+            for fire in mob.fires:
+                if self.objRect.colliderect(fire.objRect):
+                    offset = (fire.objRect.x - self.objRect.x, fire.objRect.y - self.objRect.y)
+                    jogadorColidiu = self.mask.overlap(fire.mask, offset)
+                if jogadorColidiu:  
+                    self.sounds.somExplosao_player.play()          
+                    return False, score            
+            
+        return True, score
+        
          
-    def new_rocket(self, rockets):
+    def new_rocket(self):
         if self.counter >= self.delay_rocket:
-            rocket = Rocket(self.surf_rocket, self.sounds, self.objRect.centerx, self.objRect.top)                    
+            rocket = Rocket(self.surfs, self.sounds, self.objRect.centerx, self.objRect.top, (0,-15))                    
             self.rockets.add(rocket)
             rocket.shoot()
             self.counter = 0

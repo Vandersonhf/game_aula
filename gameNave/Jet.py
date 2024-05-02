@@ -1,16 +1,12 @@
-import pygame
 from .Sprite import Sprite
 from .Surfaces import Surfaces
 from .Display import Display
 
 class Jet(Sprite):    
-    def __init__(self, surfaces:Surfaces, startx, starty, speed):
-        super().__init__(surfaces[0], startx, starty, 1)
-                                    
-        self.fly_cycle = surfaces
-        self.animation_index = 0
-        self.delay = 0
-        self.jet_delay = 7
+    def __init__(self, surfs:Surfaces, startx:int, starty:int, size:tuple[int,int], speed:int):
+        super().__init__(surfs.surf_jets, (startx,starty), size)
+             
+        self.jet_delay = 20
         self.objRect.center = (startx, starty+10)  # correct positioning 
         
         self.speed = speed      # velocidade da nave           
@@ -18,19 +14,10 @@ class Jet(Sprite):
            
     def update(self, display:Display):             
         self.draw(display.window)
-        self.fly_animation()
+        self.animation(self.jet_delay)
         
         
-    def fly_animation(self):
-        self.surf = self.fly_cycle[self.animation_index]        
-        
-        if self.animation_index < len(self.fly_cycle)-1:
-            self.delay += 1
-            if self.delay > self.jet_delay:
-                self.animation_index += 1
-                self.delay = 0
-        else:
-            self.animation_index = 0  
+   
     
     
     

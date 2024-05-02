@@ -3,14 +3,14 @@ from .Surfaces import Surfaces
 from .Sounds import Sounds
 from .Display import Display
 
-class Rocket(Sprite):    
+class Fire(Sprite):    
     def __init__(self, surfs:Surfaces, sounds:Sounds, startx, starty, speed):
-        super().__init__([surfs.surf_rocket], (startx,starty), (0,0))
+        super().__init__([surfs.surf_fire], (startx,starty), (0,0))
         self.sounds = sounds
         self.speed = speed   # velocidade do raio                          
         
     def shoot(self):
-        self.sounds.somTiro.play()
+        self.sounds.somFire.play()
         
     # definindo a função mover
     def move(self):
@@ -21,8 +21,8 @@ class Rocket(Sprite):
     def update(self, display:Display):              
         self.move()
         self.draw(display.window)
-        base_rocket = self.objRect.bottom
-        if base_rocket < 0:
+        base_rocket = self.objRect.top
+        if base_rocket > display.disp_size[1]:
             self.kill() 
         
     

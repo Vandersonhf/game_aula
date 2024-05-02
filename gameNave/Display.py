@@ -29,7 +29,7 @@ class Display():
         if self.fullscreen:
             self.toggle_fullscreen()
             
-        self.imagemFundo = pygame.image.load('images/space.jpg').convert()                     
+        self.imagemFundo = pygame.image.load('images/space0.png').convert()                     
         #redimensionando a imagem de fundo.
         self.imagemFundo = pygame.transform.scale(self.imagemFundo, self.disp_size)
         
@@ -64,21 +64,22 @@ class Display():
         self.window.blit(objTexto, rectTexto)
 
 
-    def draw_background(self, pontuacao, recorde):
+    def draw_background(self, pontuacao, recorde, fps):
         ''' Preenchendo o fundo da janela com a imagem correspondente.'''
-        self.window.blit(self.imagemFundo, (0,0))  # old
-        '''
+        #self.window.blit(self.imagemFundo, (0,0))  # old
+        
         # movendo o fundo
         for i in range(0, self.tiles):
             pos_y = i * self.bg_height + self.scroll
             self.window.blit(self.imagemFundo, (0,-pos_y))
         
         # update scroll
-        self.scroll -= 5
+        self.scroll -= 10
         if abs(self.scroll)  > self.bg_height: 
             self.scroll = 0
-        '''
+        
         # Colocando as pontuações.
         self.print('Pontuação: ' + str(pontuacao), 10, 0, 'topLeft')
         self.print('Recorde: ' + str(recorde), 10, 40, 'topLeft')
+        self.print('FPS: ' + str(fps), 10, 80, 'topLeft')
     
