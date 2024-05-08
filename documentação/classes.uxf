@@ -1,0 +1,146 @@
+<diagram program="umletino" version="15.1"><zoom_level>10</zoom_level><element><id>UMLClass</id><coordinates><x>30</x><y>10</y><w>180</w><h>280</h></coordinates><panel_attributes>Sprite
+--
+- size: (x:int, y:int)
+- col_rect: Rect
+- mask: Mask
+- sounds: list[Sound]
+- curr_surf: Surf
+- list_surf: list[Surf]
+- idx_ani: (live: int, dead:int)
+- delay_ani: (live: int, dead:int)
+- dead: bool
+- speed: int
+--
+- update ( )
+- draw ( )
+- move ( )
+- explode ( )
+- live_animation ( )
+- dead_animation ( )
+
+
+
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>620</x><y>50</y><w>200</w><h>200</h></coordinates><panel_attributes>Settings
+--
+- disp_size: (x:int, y:int)
+- window: Surface
+- fps: int
+- clock: Clock
+- fullscreen: bool
+- COLOR_TEXT: (R, G, B)
+--
+- load_resources ( )
+- get_sub_surfs ( )
+
+
+
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>270</x><y>0</y><w>120</w><h>30</h></coordinates><panel_attributes>Pygame
+
+
+
+
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>630</x><y>310</y><w>140</w><h>150</h></coordinates><panel_attributes>Editor
+--
+- tile_map: Group
+--
+- draw_pallete ( )
+- pick ( )
+- drop ( )
+- save_level ( )
+- test_level ( )
+- exit_level_mode ( )
+
+
+
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>360</x><y>50</y><w>200</w><h>300</h></coordinates><panel_attributes>Game
+--
+- score: int
+- hi_score: int
+- running: bool
+- sprites: dict['key': Group]
+--
+- menu ( )
+- new_game ( )
+- load_game ( )
+- save_game ( ) 
+- game_over ( )
+- main_loop ()
+- check_events ( )
+- check_collision ( ) 
+- populate ( )
+- draw_background ( )
+- print_text ( )
+- open_editor ( )
+- exit ( ) 
+
+
+
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>40</x><y>330</y><w>160</w><h>130</h></coordinates><panel_attributes>Player
+--
+- teclas: dict['key': bool]
+- jets: Group[Jet]
+- rockets: Group[Rocket]
+- counter
+--
+- update ( )
+- new_rocket ( ) 
+
+
+
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>220</x><y>250</y><w>130</w><h>100</h></coordinates><panel_attributes>Enemy
+--
+- delay_spawn: int
+--
+- update( )
+
+
+
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>20</x><y>530</y><w>110</w><h>70</h></coordinates><panel_attributes>Jet
+--
+- counter
+--
+- update ( )
+
+
+
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>140</x><y>530</y><w>110</w><h>100</h></coordinates><panel_attributes>Rocket
+--
+- counter
+--
+- update( )
+- shoot ( ) 
+- move ( )
+
+
+
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>280</x><y>530</y><w>110</w><h>100</h></coordinates><panel_attributes>Rocket
+--
+- counter
+--
+- update( )
+- shoot ( ) 
+- move ( )
+
+
+
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>350</x><y>380</y><w>160</w><h>130</h></coordinates><panel_attributes>Mob
+--
+- counter
+- rockets: Group[Rocket]
+--
+- update ( )
+- explode ( ) 
+- move ( ) 
+- new_rocket ( )
+
+
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>220</x><y>380</y><w>110</w><h>90</h></coordinates><panel_attributes>Asteroid
+--
+- counter
+--
+- update( )
+- explode ( )
+
+
+
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>80</x><y>450</y><w>30</w><h>100</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;80</additional_attributes></element><element><id>Relation</id><coordinates><x>150</x><y>450</y><w>30</w><h>100</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;80</additional_attributes></element><element><id>Relation</id><coordinates><x>20</x><y>280</y><w>30</w><h>270</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;250</additional_attributes></element><element><id>Relation</id><coordinates><x>200</x><y>270</y><w>30</w><h>280</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;260</additional_attributes></element><element><id>Relation</id><coordinates><x>110</x><y>280</y><w>30</w><h>70</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;50</additional_attributes></element><element><id>Relation</id><coordinates><x>200</x><y>200</y><w>40</w><h>70</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;20;50</additional_attributes></element><element><id>Relation</id><coordinates><x>240</x><y>340</y><w>30</w><h>60</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;40</additional_attributes></element><element><id>Relation</id><coordinates><x>340</x><y>340</y><w>30</w><h>60</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;40</additional_attributes></element><element><id>Relation</id><coordinates><x>320</x><y>500</y><w>100</w><h>50</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>80;10;10;30</additional_attributes></element><element><id>Relation</id><coordinates><x>200</x><y>0</y><w>90</w><h>60</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>70;10;10;40</additional_attributes></element><element><id>Relation</id><coordinates><x>200</x><y>90</y><w>180</w><h>30</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>160;10;10;10</additional_attributes></element></diagram>
