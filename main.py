@@ -1,11 +1,7 @@
-#import gameNave
-from Asteroids import Indie_game
+import Asteroids
 
 if __name__ == '__main__':
-    '''inicialização do jogo'''
+    '''inicialização do jogo'''    
     
-    Indie_game.Game()
+    Asteroids.run_game()
     
-    # normal run        
-    #game = gameNave.JogoNave(60,True,'Asteroides')
-     

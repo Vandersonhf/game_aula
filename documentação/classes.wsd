@@ -1,9 +1,0 @@
-@startuml
-class Jogador {
-  -Dict prop  
-  +get_player()
-  +set_player()
-  +update_player()
-  -__internal__()
-}
-@enduml
