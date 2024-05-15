@@ -22,7 +22,7 @@ class Player(Sprite):
         pos = [self.col_rect.centerx, self.col_rect.bottom]
         size = (settings.surf_player['jets'][0].get_width()*2, settings.surf_player['jets'][0].get_height()*2)    
         self.components.add(Jet(pos, size, self.speed))
-        
+                                
         # Inicializa posição.
         dx = self.col_rect.centerx
         dy = self.col_rect.centery
@@ -58,7 +58,20 @@ class Player(Sprite):
         pygame.mouse.set_pos(self.col_rect.centerx, self.col_rect.centery)        
     
     def update(self):
-        self.counter += 1        
+        self.counter += 1 
+        # verificando extra power ups
+        size = (settings.surf_player['extra'][0].get_width(), settings.surf_player['extra'][0].get_height())
+        if settings.ups == 2 and len(self.components)<settings.ups:            
+            pos = [self.col_rect.center[0]+50, self.col_rect.top-20]            
+            self.components.add(Power(pos, size, self.speed))
+        elif settings.ups == 3 and len(self.components)<settings.ups:
+            pos = [self.col_rect.center[0]-50, self.col_rect.top-20]
+            self.components.add(Power(pos, size, self.speed))
+        elif settings.ups == 4 and len(self.components)<settings.ups:
+            pass
+        elif settings.ups == 5 and len(self.components)<settings.ups:
+            pass        
+               
         # Movimentando a nave       
         self.move()
                 
@@ -67,28 +80,42 @@ class Player(Sprite):
         self.rockets.update()
         
         # desenhando jogador(nave). 
-        self.draw(settings) 
-           
-        # verifica colisão
-        #return self.check_collision(rocks, mobs) 
+        self.draw(settings)            
     
     def new_rocket(self):
         if self.counter >= self.delay_rocket:
             pos = [self.col_rect.centerx, self.col_rect.top]
             size = (settings.surf_player['rocket'][0].get_width(), settings.surf_player['rocket'][0].get_height())
-            rocket = Rocket(pos, size)                    
-            self.rockets.add(rocket)
+            for i in range(1,settings.ups+1):                
+                rocket = Rocket(pos, size)
+                rocket.col_rect.center = pos                  
+                self.rockets.add(rocket)               
+                if i == 2: pos[0] = pos[0]-100
+                if i == 1: pos[0] = pos[0]+50
             rocket.shoot()
             self.counter = 0        
    
    
+   
+class Power(Sprite):
+    def __init__(self, pos, size, speed):
+        super().__init__(size, pos, settings.surf_player['extra'], settings.sound_player['jets'])
+             
+        self.delay_ani = 1
+        self.col_rect.center = (pos[0], pos[1]+10)  # correct positioning 
+        
+        self.speed = speed      # velocidade da nave           
+             
+    def update(self):             
+        self.draw(settings)
+        #self.animation(0)
             
             
 class Jet(Sprite):
     def __init__(self, pos, size, speed):
         super().__init__(size, pos, settings.surf_player['jets'], settings.sound_player['jets'])
              
-        self.delay_ani = 20
+        self.delay_ani = 1
         self.col_rect.center = (pos[0], pos[1]+10)  # correct positioning 
         
         self.speed = speed      # velocidade da nave           
