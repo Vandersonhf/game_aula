@@ -1,1 +1,1 @@
-Versão 0.25 pygame - aula 3 - tópicos 2
+Versão 0.7.1 pygame - aula 6 - tópicos 2
