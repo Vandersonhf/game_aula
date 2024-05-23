@@ -63,14 +63,16 @@ class Player(Sprite):
         size = (settings.surf_player['extra'][0].get_width(), settings.surf_player['extra'][0].get_height())
         if settings.ups == 2 and len(self.components)<settings.ups:            
             pos = [self.col_rect.center[0]+50, self.col_rect.top-20]            
-            self.components.add(Power(pos, size, self.speed))
+            self.components.add(Power(pos, size, self.speed, rotate = -15))
         elif settings.ups == 3 and len(self.components)<settings.ups:
             pos = [self.col_rect.center[0]-50, self.col_rect.top-20]
-            self.components.add(Power(pos, size, self.speed))
+            self.components.add(Power(pos, size, self.speed, rotate = 15))
         elif settings.ups == 4 and len(self.components)<settings.ups:
-            pass
+            pos = [self.col_rect.center[0]-100, self.col_rect.top-20]
+            self.components.add(Power(pos, size, self.speed, rotate = 30))
         elif settings.ups == 5 and len(self.components)<settings.ups:
-            pass        
+            pos = [self.col_rect.center[0]+100, self.col_rect.top-20]
+            self.components.add(Power(pos, size, self.speed, rotate = -30))       
                
         # Movimentando a nave       
         self.move()
@@ -80,26 +82,57 @@ class Player(Sprite):
         self.rockets.update()
         
         # desenhando jogador(nave). 
-        self.draw(settings)            
+        self.draw(settings)  
+        
+        #draw shield        
+        center = list(self.col_rect.center)
+        center[1] = center[1]+10
+        if settings.life == 3:            
+            pygame.draw.circle(settings.window, 'blue', center, 50, width=1)
+            pygame.draw.circle(settings.window, 'blue', center, 45, width=1)             
+        elif settings.life == 2:    
+            pygame.draw.circle(settings.window, 'blue', center, 45, width=1)
+              
     
     def new_rocket(self):
         if self.counter >= self.delay_rocket:
             pos = [self.col_rect.centerx, self.col_rect.top]
             size = (settings.surf_player['rocket'][0].get_width(), settings.surf_player['rocket'][0].get_height())
-            for i in range(1,settings.ups+1):                
-                rocket = Rocket(pos, size)
+            #speed = [0,-15]
+            rotate = 0
+            for i in range(1,settings.ups+1): 
+                if i == 1: 
+                    pos[0] = self.col_rect.centerx           
+                    speed = [0,-15]
+                    rotate = 0
+                if i == 2: 
+                    pos[0] = self.col_rect.centerx+50
+                    speed = [2,-15]
+                    rotate = 0
+                if i == 3: 
+                    pos[0] = self.col_rect.centerx-50
+                    speed = [-2,-15]
+                    rotate = 0
+                if i == 4: 
+                    pos[0] = self.col_rect.centerx-100 
+                    speed = [-5,-15] 
+                    rotate = 30  
+                if i == 5: 
+                    pos[0] = self.col_rect.centerx+100 
+                    speed = [5,-15] 
+                    rotate = -30
+                rocket = Rocket(pos, size, speed, rotate)
                 rocket.col_rect.center = pos                  
-                self.rockets.add(rocket)               
-                if i == 2: pos[0] = pos[0]-100
-                if i == 1: pos[0] = pos[0]+50
+                self.rockets.add(rocket)           
             rocket.shoot()
             self.counter = 0        
    
    
    
 class Power(Sprite):
-    def __init__(self, pos, size, speed):
-        super().__init__(size, pos, settings.surf_player['extra'], settings.sound_player['jets'])
+    def __init__(self, pos, size, speed, rotate=0):
+        super().__init__(size, pos, settings.surf_player['extra'],
+                         settings.sound_player['jets'],rotate=rotate)
              
         self.delay_ani = 1
         self.col_rect.center = (pos[0], pos[1]+10)  # correct positioning 
@@ -128,10 +161,11 @@ class Jet(Sprite):
         
         
 class Rocket(Sprite):    
-    def __init__(self, pos, size):
-        super().__init__(size, pos, settings.surf_player['rocket'], settings.sound_player['rocket'])
+    def __init__(self, pos, size, speed, rotate=0):
+        super().__init__(size, pos, settings.surf_player['rocket'],
+                         settings.sound_player['rocket'], rotate=rotate)
         
-        self.speed = (0,-15)   # velocidade do raio                          
+        self.speed = speed   # velocidade do raio                          
         
     def shoot(self):
         self.sounds[0].play()

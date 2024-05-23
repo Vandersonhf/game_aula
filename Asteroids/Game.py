@@ -1,6 +1,7 @@
 from .Player import Player
 from .Enemy import Asteroid, Mob, Boss, PowerUP, ShieldUP
 from .Settings import settings
+from .Menu import *
 import pygame
 import random
 
@@ -9,19 +10,9 @@ class Game:
         settings.load_resources()
         
     def run(self):        
-        self.menu() 
-            
-    def menu(self):        
-        pos = settings.disp_size
-        offset = settings.font_size
-        self.print_text('Asteroides Troianos', (pos[0]/2), (pos[1]/2)-offset, 'center')
-        self.print_text('Pressione F1 para começar.', (pos[0]/2),(pos[1]/2)+offset, 'center')
-        self.print_text('Pressione ESC para sair.', (pos[0]/2),(pos[1]/2)+offset*2, 'center')    
-        pygame.display.update()
-        self.__wait_input__()
-        
-        self.new_game()    
-    
+        run_launcher()
+        self.new_game()
+           
     def new_game (self):
         while True:                             # laço externo do game over
             # Configurando o começo do jogo.
@@ -29,6 +20,7 @@ class Game:
             self.mobs = pygame.sprite.Group()  # lista com as naves inimigas    
             self.pows = pygame.sprite.Group()  # lista com os power ups  
             self.shields = pygame.sprite.Group()  # lista com os shields para life          
+            self.boss = None
             settings.running = True                    # indica se o loop do jogo deve continuar
             settings.score = 0                         # pontuação
             settings.life = 3                       # life
@@ -36,7 +28,7 @@ class Game:
             self.counter = 0                    # contador de iterações
             self.counter2 = 0                    # contador de iterações
             self.level_counter=120              # countdown para mostrar novo level
-            self.level = 1                      # fator para velocidade aumentar
+            self.level = 0                      # fator para velocidade aumentar
             self.level_check = False            # veficia nova atualização da velocidade
                    
             pygame.mixer.music.play(-1, 0.0)    # colocando a música de fundo
@@ -49,7 +41,8 @@ class Game:
             self.main_loop()        # inicia novo jogo
                                     
             # Parando o jogo e mostrando a tela final.
-            self.__menu_last__()
+            if self.boss != None and self.boss.dead: self.__menu_win__()        
+            else: self.__menu_last__()
         
     def main_loop (self):
         ''' new game'''
@@ -62,6 +55,7 @@ class Game:
             settings.running = self.check_events()
                         
             #criar inimigos   
+            #if self.level <= 5: 
             self.counter = self.populate_asteroid(self.counter)            
             self.counter2 = self.populate_mobs(self.counter2)
             
@@ -71,27 +65,41 @@ class Game:
             #atualiza inimigos                        
             self.asteroids.update()
             self.mobs.update()
+            for mob in self.mobs:
+                mob.move(self.player.col_rect.centerx)
             self.pows.update()
             self.shields.update()
+            if self.boss != None:
+                self.boss.update()
+                self.boss.move(self.player.col_rect.centerx)
                         
             #atualiza jogador   
             self.player.update()
             settings.running = self.check_collision()
+            
+            #derrotou o boss
+            if self.boss != None and self.boss.dead \
+                    and self.boss.idx_ani >= len(self.boss.list_surf)-1 \
+                    and self.boss.delay > self.boss.delay_ani-1:
+                settings.running = False
             
             # verifica fim de jogo com recorde
             if not settings.running and settings.score > settings.hi_score:
                 settings.hi_score = settings.score 
                 
             # verifica aumento de velocidade
-            if settings.score > self.level * 2000 and self.level_counter==120:
+            if (self.level==0 or settings.score > self.level * settings.level_points) \
+                    and self.level_counter==120:
                 self.level_check = True                 
             if self.level_check:                
                 if self.level_counter>0:
                     self.level_counter -=1
                     pos = settings.disp_size
                     offset = settings.font_size
-                    if self.level> 1: 
+                    if self.level>= 0 and self.level<5: 
                         self.print_text('LEVEL '+str(self.level+1), (pos[0]/2),(pos[1]/2)-offset, 'center') 
+                    elif self.level == 5: 
+                        self.print_text('FINAL STAGE ', (pos[0]/2),(pos[1]/2)-offset, 'center')
                 else:    
                     settings.VELMINIMA = settings.VELMINIMA + (self.level)
                     if settings.VELMINIMA > settings.VELMAXIMA: settings.VELMINIMA = settings.VELMAXIMA                    
@@ -115,7 +123,8 @@ class Game:
                 self.exit()  
             if evento.type == pygame.KEYDOWN:
                 if evento.key == pygame.K_ESCAPE:
-                    self.exit()   
+                    run_menu()
+                    #self.exit()   
                 if evento.key == pygame.K_LEFT or evento.key == pygame.K_a:                    
                     self.player.teclas['esquerda'] = True
                 if evento.key == pygame.K_RIGHT or evento.key == pygame.K_d:
@@ -174,7 +183,7 @@ class Game:
                         self.player.rockets.remove(rocket)
                         settings.score = settings.score + 50
             if rock.dead and rock.idx_ani >= len(rock.list_surf)-1 and rock.delay > rock.delay_ani-1:                   
-                r = random.randint(1,15)                        
+                r = random.randint(1,settings.luck)                        
                 if r == 1 and settings.life < 3:
                     shield = ShieldUP(rock.col_rect.center, rock.size)                               
                     self.shields.add(shield) 
@@ -199,8 +208,8 @@ class Game:
                         settings.score = settings.score + 100
             #power up
             if mob.dead and mob.idx_ani >= len(mob.list_surf)-1 and mob.delay > mob.delay_ani-1:                   
-                r = random.randint(1,15)                        
-                if r == 1 and settings.ups < 3:
+                r = random.randint(1,settings.luck)                        
+                if r == 1 and settings.ups < 5:
                     pow = PowerUP(mob.col_rect.center, mob.size)                               
                     self.pows.add(pow)                    
             # enemy rockets hit player
@@ -219,10 +228,11 @@ class Game:
                     offset = (pow.col_rect.x - self.player.col_rect.x, pow.col_rect.y - self.player.col_rect.y)
                     jogadorColidiu = self.player.mask.overlap(pow.mask, offset)
                 if jogadorColidiu:
-                    settings.ups += 1                    
-                    pow.get()
+                    if settings.ups < 5:
+                        settings.ups += 1                    
+                        pow.get()
                     pow.kill() 
-        # player get powerup
+        # player get shield - life
         for shield in self.shields:
             jogadorColidiu = False
             if not shield.dead:
@@ -230,15 +240,52 @@ class Game:
                     offset = (shield.col_rect.x - self.player.col_rect.x, shield.col_rect.y - self.player.col_rect.y)
                     jogadorColidiu = self.player.mask.overlap(shield.mask, offset)
                 if jogadorColidiu:
-                    settings.life += 1                    
-                    shield.get()
-                    shield.kill()                        
+                    if settings.life < 3:
+                        settings.life += 1                    
+                        shield.get()
+                    shield.kill()    
+        # check boss
+        jogadorColidiu = False
+        if self.boss != None:
+            # check player colide boss
+            if not self.boss.dead:
+                if self.player.col_rect.colliderect(self.boss.col_rect):
+                    offset = (self.boss.col_rect.x - self.player.col_rect.x, self.boss.col_rect.y - self.player.col_rect.y)
+                    jogadorColidiu = self.player.mask.overlap(self.boss.mask, offset)
+                if jogadorColidiu: 
+                    self.boss.life -= 1
+                    if self.boss.life == 0: 
+                        self.boss.explode()
+                        settings.score = settings.score + 1000 
+                    else: 
+                        self.boss.sounds[0].play()
+                    return self.reduce_life()
+            # check player destroy enemy
+            for rocket in self.player.rockets:
+                if not self.boss.dead:
+                    rocketColidiu = rocket.col_rect.colliderect(self.boss.col_rect)
+                    if rocketColidiu:
+                        self.boss.life -= 1
+                        if self.boss.life == 0: 
+                            self.boss.explode()
+                            settings.score = settings.score + 1000 
+                        else: 
+                            self.boss.sounds[0].play()
+                        self.player.rockets.remove(rocket)                                              
+            # enemy rockets hit player
+            for fire in self.boss.rockets:
+                if self.player.col_rect.colliderect(fire.col_rect):
+                    offset = (fire.col_rect.x - self.player.col_rect.x, fire.col_rect.y - self.player.col_rect.y)
+                    jogadorColidiu = self.player.mask.overlap(fire.mask, offset)
+                if jogadorColidiu: 
+                    self.boss.rockets.remove(fire)
+                    return self.reduce_life()                    
         return True
     
     def reduce_life(self):
         settings.sound_player['ship'][0].play()
         if settings.life > 1:
-            settings.life -= 1
+            if not eval(settings.hack['god']): settings.life -= 1
             return True
         else:                    
             return False
@@ -276,6 +323,9 @@ class Game:
             vel_x = random.randint(-settings.VELMINIMA, settings.VELMINIMA)
             vel_y = random.randint(settings.VELMINIMA, settings.VELMAXIMA)
             size = [settings.TAMMAXIMO, settings.TAMMAXIMO]
+            if eval(settings.hack['easy']):
+                vel_x = int(vel_x/2)
+                vel_y = int(vel_y/2)
             vel = [vel_x, vel_y]                #velocity/speed
             
             # mob configs
@@ -283,25 +333,28 @@ class Game:
             mob_fire_delay = 60
             if self.level == 2: 
                 mob_surf = 'enemy2'
-                mob_fire_delay = 40
+                mob_fire_delay = 50
             if self.level == 3: 
                 mob_surf = 'enemy3'
-                mob_fire_delay = 30
+                mob_fire_delay = 40
             if self.level == 4: 
                 mob_surf = 'enemy4'
-                mob_fire_delay = 20
+                mob_fire_delay = 30
             if self.level >= 5: 
                 mob_surf = 'sub_boss'
-                mob_fire_delay = 10
-            
+                mob_fire_delay = 30            
             #add boss
-            if self.level == 6:
-                boss = Boss([pos[0]/2, 0], (200,200), (0,0), 'boss', 5)
+            if self.level == 6 and self.boss == None:
+                self.boss = Boss([pos[0]/2, 0], (300,300), (0,0), 'boss', 20)                
+                #counter = 0
             
             # not spawn mobs in intermission
-            if self.level_counter == 120:    
+            if self.level_counter == 120: 
+                if eval(settings.hack['easy']):
+                       mob_fire_delay = mob_fire_delay*3
                 mob = Mob([posX, posY], size, vel, mob_surf, mob_fire_delay)        #create enemy 
                 self.mobs.add(mob)
+                 
         return counter
     
     def print_text(self, texto, x, y, position):
@@ -331,7 +384,10 @@ class Game:
         self.print_text('PLAYER 1', 10, 0, 'topLeft')
         self.print_text('' + str(settings.score), 10, 40, 'topLeft')
         self.print_text('HI SCORE: ' + str(settings.hi_score), settings.disp_size[0]/2, 20, 'center')
-        self.print_text('LEVEL '+str(self.level), 10, 80, 'topLeft')
+        if self.level == 0: lv=str(self.level+1)
+        else: lv= str(self.level)
+        if self.level == 6: lv ='FINAL'
+        self.print_text(f'LEVEL {lv}', 10, 80, 'topLeft')
         self.print_text('FPS: ' + str(int(settings.clock.get_fps())), 10, 120, 'topLeft')
         
         #desenhando a vida da nave
@@ -390,6 +446,30 @@ class Game:
         #limpando os grupos
         self.asteroids.empty()
         self.mobs.empty()
+        
+    def __menu_win__(self):        
+        #pygame.mixer.music.stop()
+        #settings.sound_over.play() 
+        
+        #limpando os grupos
+        self.asteroids.empty()
+        self.mobs.empty()
+        self.boss = None
+        self.player.kill()
+        
+        self.draw_background()
+        
+        pos = settings.disp_size
+        offset = settings.font_size
+        self.print_text('YOU WIN!!!', (pos[0]/2),(pos[1]/2)-offset, 'center')
+        self.print_text('Pressione F1 para recomeçar.', (pos[0]/2), (pos[1]/2)+offset, 'center')
+        self.print_text('Pressione ESC para sair.', (pos[0]/2), (pos[1]/2)+offset*2, 'center')    
+        
+        pygame.display.update()
+        # Aguardando entrada por teclado para reiniciar o jogo ou sair.
+        self.__wait_input__()
+        #settings.sound_over.stop()
+           
     
     def load_game (self):
         pass

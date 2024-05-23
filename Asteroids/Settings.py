@@ -1,5 +1,7 @@
 import pygame
-import tkinter as tk
+#import tkinter as tk
+from customtkinter import *
+#from PIL import Image
 
 class Settings:        
     def __init__(self):
@@ -15,15 +17,15 @@ class Settings:
         # Ocultando o cursor 
         pygame.mouse.set_visible(False)             
             
-        #set window   
-        root = tk.Tk()
-        self.disp_size = (root.winfo_screenwidth(), root.winfo_screenheight())
+        #set window           
+        self.menu = CTk()  
+        #self.menu.resizable(width=False, height=False)           
+        self.disp_size = (self.menu.winfo_screenwidth(), self.menu.winfo_screenheight())        
         self.window = pygame.display.set_mode(self.disp_size)
         pygame.display.set_caption(name)
 
         if self.fullscreen: pygame.display.toggle_fullscreen()
-        else: pass
-
+        
         # Configurando a fonte.        
         self.font_size = 48 
         self.font = pygame.font.Font(None, self.font_size)
@@ -34,6 +36,8 @@ class Settings:
         self.life = 3
         self.ups = 1
         self.running: bool = False
+        self.level_points = 2000
+        self.luck = 10
 
         # moving background
         self.scroll = 0
@@ -48,6 +52,10 @@ class Settings:
         self.VELMINIMA = 3       # velocidade mínima do rock
         self.VELMAXIMA = 10       # velocidade máxima do rock
         self.ITERACOES = 60      # número de iterações antes de criar um novo rock  
+        
+        #hacks
+        self.hack = {'easy':'False', 'god':'False'}        
+        
         
     def load_resources(self):
         '''load images and sounds'''                       

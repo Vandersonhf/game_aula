@@ -2,7 +2,7 @@
 import pygame
 
 class Sprite(pygame.sprite.Sprite):
-    def __init__(self, size, pos, surfs:list, sounds:list):
+    def __init__(self, size, pos, surfs:list, sounds:list, rotate=0):
         super().__init__()
         
         self.size = size           #[width, height]
@@ -10,8 +10,9 @@ class Sprite(pygame.sprite.Sprite):
         self.sounds = sounds
         
         surfs_scaled = []
-        for s in surfs:
+        for s in surfs:                
              surf = pygame.transform.scale(s, size)
+             surf = pygame.transform.rotozoom(surf,rotate,1)
              surfs_scaled.append(surf)
         self.curr_surf = surfs_scaled[0]
         self.list_surf = surfs_scaled     
