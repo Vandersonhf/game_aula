@@ -90,7 +90,7 @@ class Mob(Sprite):
                                     self.col_rect.width, 13)  
             life_rect = pygame.Rect(self.col_rect.left, self.col_rect.top-13,
                                     int((self.col_rect.width*self.life)/self.maxlife), 8)      
-            if not self.dead: pygame.draw.rect(settings.window, 'white', rect)
+            if not self.dead: pygame.draw.rect(settings.window, 'black', rect)
             pygame.draw.rect(settings.window, 'red', life_rect)
         
         #kill out of range

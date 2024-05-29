@@ -2,6 +2,7 @@ from customtkinter import *
 from PIL import Image, ImageTk
 from .Settings import settings
 import pygame
+from .SQL import *
 
 def set_tab1(w,h,tab):  
     frame = CTkFrame(master=tab, width=w, height=h, fg_color='#333333', corner_radius=3, border_width=2)
@@ -107,7 +108,70 @@ def set_start_exit(frame):
     b2 = CTkButton(master=frame, text='EXIT GAME', corner_radius=30, fg_color='transparent',
                 border_width=2, command=exit_bt)
     b2.place(relx=0.5, rely=0.8, anchor='center')
+ 
+def login_entry(w,h):
+    frame = CTkFrame(master=settings.menu, width=w, height=h, fg_color='#333333', corner_radius=3, border_width=2)
+    frame.place(relx=0.5, rely=0.6, anchor='center')
+                  
+    l1 = CTkLabel(master=frame, text='LOGIN',font=('Arial',20),text_color='#111111')
+    l1.place(relx=0.5, rely=0.2, anchor='center')
     
+    entry1 = CTkEntry(master=frame, corner_radius=30, fg_color='transparent',
+                border_width=2, placeholder_text='login')
+    entry1.place(relx=0.5, rely=0.3, anchor='center')
+       
+    entry2 = CTkEntry(master=frame, corner_radius=30, fg_color='transparent',
+                border_width=2, placeholder_text='pass')
+    entry2.place(relx=0.5, rely=0.4, anchor='center')
+        
+    def login_bt(): 
+        settings.name = entry1.get()
+        settings.pwd = entry2.get()
+        #print(settings.name, settings.pwd)
+        if sql_login() == 1:
+            settings.menu.destroy()
+            settings.menu.quit()
+        else: 
+            l1 = CTkLabel(master=frame, text='LOGIN INVALIDO!!!',font=('Arial',10),text_color='#111111')
+            l1.place(relx=0.5, rely=0.5, anchor='center')
+        
+    b1 = CTkButton(master=frame, text='LOGIN GAME', corner_radius=30, fg_color='transparent',
+                border_width=2, command=login_bt)
+    b1.place(relx=0.5, rely=0.6, anchor='center')
+    
+    def register_bt():
+        sql_register()
+        if sql_login() == 1:            
+            l1 = CTkLabel(master=frame, text='CADASTRADO COM SUCESSO!!!',font=('Arial',10),text_color='#111111')
+            l1.place(relx=0.5, rely=0.5, anchor='center')
+    
+    b2 = CTkButton(master=frame, text='REGISTER', corner_radius=30, fg_color='transparent',
+                border_width=2, command=register_bt)
+    b2.place(relx=0.5, rely=0.7, anchor='center')
+    
+    def exit_bt(): 
+        pygame.quit()       
+        exit()
+        
+    b3 = CTkButton(master=frame, text='EXIT GAME', corner_radius=30, fg_color='transparent',
+                border_width=2, command=exit_bt)
+    b3.place(relx=0.5, rely=0.8, anchor='center')
+
+    
+def menu_login():
+    settings.menu = CTk() 
+    set_appearance_mode('dark')
+    set_default_color_theme('blue')
+    w = settings.disp_size[0]
+    h = settings.disp_size[1]
+    
+    if settings.fullscreen:
+        settings.menu.attributes("-fullscreen", "True")
+        settings.menu.state('zoomed')
+
+    login_entry(w,h)
+    
+    settings.menu.mainloop()
 
 def run_menu():
     settings.menu = CTk() 

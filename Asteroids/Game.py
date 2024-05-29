@@ -2,6 +2,7 @@ from .Player import Player
 from .Enemy import Asteroid, Mob, Boss, PowerUP, ShieldUP
 from .Settings import settings
 from .Menu import *
+from .SQL import *
 import pygame
 import random
 
@@ -15,6 +16,7 @@ class Game:
         select = menu.run()
         
         if select == 1:
+            self.login()
             self.new_game()
         elif select == 2:
             pass
@@ -25,6 +27,9 @@ class Game:
         elif select == 4:
             self.exit()
             
+    def login(self):
+        menu_login()        
+    
     def new_game (self):
         while True:                             # laço externo do game over
             # Configurando o começo do jogo.
@@ -42,6 +47,10 @@ class Game:
             self.level_counter=120              # countdown para mostrar novo level
             self.level = 0                      # fator para velocidade aumentar
             self.level_check = False            # veficia nova atualização da velocidade
+            
+            hi = sql_request()
+            settings.hi_score = hi
+            settings.name = str(sql_name().upper())
                    
             pygame.mixer.music.play(-1, 0.0)    # colocando a música de fundo
             
@@ -97,7 +106,8 @@ class Game:
             
             # verifica fim de jogo com recorde
             if not settings.running and settings.score > settings.hi_score:
-                settings.hi_score = settings.score 
+                settings.hi_score = settings.score
+                sql_update(settings.hi_score)                 
                 
             # verifica aumento de velocidade
             #if (self.level==0 or settings.score > self.level * settings.level_points) \
@@ -412,9 +422,10 @@ class Game:
             settings.scroll = 0
         
         # Colocando as pontuações.
-        self.print_text('PLAYER 1', 10, 0, 'topLeft')
+        self.print_text(settings.name, 10, 0, 'topLeft')
         self.print_text('' + str(settings.score), 10, 40, 'topLeft')
-        self.print_text('HI SCORE: ' + str(settings.hi_score), settings.disp_size[0]/2, 20, 'center')
+        self.print_text('HI SCORE: ' + str(settings.hi_score) +' '+ settings.name,
+                        settings.disp_size[0]/2, 20, 'center')
         if self.level == 0: lv=str(self.level+1)
         else: lv= str(self.level)
         if self.level == 6: lv ='FINAL'

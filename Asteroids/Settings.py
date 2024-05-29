@@ -40,6 +40,8 @@ class Settings:
         self.time = 0
         self.time_level = 2_000
         self.luck = 10
+        self.name = ''
+        self.pwd = ''
 
         # moving background
         self.scroll = 0
