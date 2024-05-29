@@ -82,6 +82,10 @@ class Player(Sprite):
         self.rockets.update()
         
         # desenhando jogador(nave). 
+        if settings.ups >= 3 and settings.ups < 5:
+            self.curr_surf = self.surfs_scaled[1]
+        elif settings.ups == 5:
+            self.curr_surf = self.surfs_scaled[2]
         self.draw(settings)  
         
         #draw shield        
@@ -175,9 +179,14 @@ class Rocket(Sprite):
         self.col_rect.x += self.speed[0]
         self.col_rect.y += self.speed[1]
            
-    def update(self):              
+    def update(self): 
+        if settings.ups == 5: 
+            self.curr_surf = self.surfs_scaled[1]
+                     
         self.move()
         self.draw(settings)
         base_rocket = self.col_rect.bottom
         if base_rocket < 0:
             self.kill() 
+            
+            

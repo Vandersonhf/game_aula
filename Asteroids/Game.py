@@ -9,10 +9,22 @@ class Game:
     def __init__(self):
         settings.load_resources()
         
-    def run(self):        
-        run_launcher()
-        self.new_game()
-           
+    def run(self): 
+        #run_launcher()       
+        menu = Basic_menu()
+        select = menu.run()
+        
+        if select == 1:
+            self.new_game()
+        elif select == 2:
+            pass
+        elif select == 3:
+            run_menu()
+            if not settings.running:
+               self.new_game() 
+        elif select == 4:
+            self.exit()
+            
     def new_game (self):
         while True:                             # laço externo do game over
             # Configurando o começo do jogo.
@@ -46,10 +58,10 @@ class Game:
         
     def main_loop (self):
         ''' new game'''
-        #settings.sound_start.play()
         while settings.running:                  
             self.counter += 1
             self.counter2 += 1
+            settings.time += 1
                         
             #verifica eventos e atualiza em memória       
             settings.running = self.check_events()
@@ -88,9 +100,11 @@ class Game:
                 settings.hi_score = settings.score 
                 
             # verifica aumento de velocidade
-            if (self.level==0 or settings.score > self.level * settings.level_points) \
+            #if (self.level==0 or settings.score > self.level * settings.level_points) \
+            if (self.level==0 or settings.time > settings.time_level)\
                     and self.level_counter==120:
-                self.level_check = True                 
+                self.level_check = True 
+                settings.time = 0               
             if self.level_check:                
                 if self.level_counter>0:
                     self.level_counter -=1
@@ -185,7 +199,7 @@ class Game:
             if rock.dead and rock.idx_ani >= len(rock.list_surf)-1 and rock.delay > rock.delay_ani-1:                   
                 r = random.randint(1,settings.luck)                        
                 if r == 1 and settings.life < 3:
-                    shield = ShieldUP(rock.col_rect.center, rock.size)                               
+                    shield = ShieldUP(rock.col_rect.center, (50,50))                               
                     self.shields.add(shield) 
         # Checando se jogador ou algum rocket colidiu com algum mob.
         for mob in self.mobs:
@@ -196,21 +210,30 @@ class Game:
                     offset = (mob.col_rect.x - self.player.col_rect.x, mob.col_rect.y - self.player.col_rect.y)
                     jogadorColidiu = self.player.mask.overlap(mob.mask, offset)
                 if jogadorColidiu: 
-                    mob.dead = True
+                    mob.life -= 1
+                    if mob.life == 0: 
+                        mob.explode()
+                        settings.score = settings.score + 100 
+                    else: 
+                        mob.sounds[0].play()                    
                     return self.reduce_life()
             # check player destroy enemy
             for rocket in self.player.rockets:
                 if not mob.dead:
                     rocketColidiu = rocket.col_rect.colliderect(mob.col_rect)
                     if rocketColidiu:
-                        mob.explode()                                   
+                        mob.life -= 1
+                        if mob.life == 0: 
+                            mob.explode()
+                            settings.score = settings.score + 100 
+                        else: 
+                            mob.sounds[0].play()                                                       
                         self.player.rockets.remove(rocket)
-                        settings.score = settings.score + 100
             #power up
             if mob.dead and mob.idx_ani >= len(mob.list_surf)-1 and mob.delay > mob.delay_ani-1:                   
                 r = random.randint(1,settings.luck)                        
                 if r == 1 and settings.ups < 5:
-                    pow = PowerUP(mob.col_rect.center, mob.size)                               
+                    pow = PowerUP(mob.col_rect.center, (50,50))                               
                     self.pows.add(pow)                    
             # enemy rockets hit player
             for fire in mob.rockets:
@@ -260,7 +283,7 @@ class Game:
                     else: 
                         self.boss.sounds[0].play()
                     return self.reduce_life()
-            # check player destroy enemy
+            # check player destroy boss
             for rocket in self.player.rockets:
                 if not self.boss.dead:
                     rocketColidiu = rocket.col_rect.colliderect(self.boss.col_rect)
@@ -294,7 +317,7 @@ class Game:
     
     def populate_asteroid (self, counter):
         # Adicionando asteroids quando indicado.        
-        if counter >= settings.ITERACOES:
+        if counter >= settings.ITERACOES/(self.level+1):
             counter = 0
             tamAsteroide = random.randint(settings.TAMMINIMO, settings.TAMMAXIMO)
             pos = settings.disp_size
@@ -314,45 +337,53 @@ class Game:
     
     def populate_mobs (self, counter):
         # Adicionando mobs quando indicado.        
-        if counter >= settings.ITERACOES:
+        if counter >= settings.ITERACOES/(self.level+1):
             counter = 0
             tamAsteroide = random.randint(settings.TAMMINIMO, settings.TAMMAXIMO)
             pos = settings.disp_size
             posX = random.randint(0, pos[0] - tamAsteroide)
             posY = - tamAsteroide
-            vel_x = random.randint(-settings.VELMINIMA, settings.VELMINIMA)
-            vel_y = random.randint(settings.VELMINIMA, settings.VELMAXIMA)
+            vel_x = random.randint(settings.VELMINIMA, settings.VELMINIMA)
+            vel_y = random.randint(settings.VELMAXIMA, settings.VELMAXIMA)
             size = [settings.TAMMAXIMO, settings.TAMMAXIMO]
             if eval(settings.hack['easy']):
                 vel_x = int(vel_x/2)
                 vel_y = int(vel_y/2)
-            vel = [vel_x, vel_y]                #velocity/speed
+            vel = [(vel_x*self.level)/2, (vel_y*self.level)/2]                #velocity/speed
             
             # mob configs
+            type = 1
             mob_surf = 'enemy1'
             mob_fire_delay = 60
             if self.level == 2: 
+                type = 2
                 mob_surf = 'enemy2'
-                mob_fire_delay = 50
+                mob_fire_delay = 55
             if self.level == 3: 
+                type = 3
                 mob_surf = 'enemy3'
-                mob_fire_delay = 40
+                mob_fire_delay = 50
             if self.level == 4: 
+                type = 4
                 mob_surf = 'enemy4'
-                mob_fire_delay = 30
+                mob_fire_delay = 45
             if self.level >= 5: 
+                type = 5
                 mob_surf = 'sub_boss'
-                mob_fire_delay = 30            
+                mob_fire_delay = 40            
             #add boss
             if self.level == 6 and self.boss == None:
-                self.boss = Boss([pos[0]/2, 0], (300,300), (0,0), 'boss', 20)                
+                self.boss = Boss([pos[0]/2, 50], (300,300), (0,0), 'boss', 40)                
                 #counter = 0
             
             # not spawn mobs in intermission
             if self.level_counter == 120: 
                 if eval(settings.hack['easy']):
                        mob_fire_delay = mob_fire_delay*3
-                mob = Mob([posX, posY], size, vel, mob_surf, mob_fire_delay)        #create enemy 
+                mob = Mob([posX, posY], size, vel, mob_surf, mob_fire_delay, type)        #create enemy
+                if self.level >= 5:
+                    mob.life = 3
+                    mob.maxlife = 3
                 self.mobs.add(mob)
                  
         return counter
@@ -448,7 +479,7 @@ class Game:
         self.mobs.empty()
         
     def __menu_win__(self):        
-        #pygame.mixer.music.stop()
+        pygame.mixer.music.stop()
         #settings.sound_over.play() 
         
         #limpando os grupos

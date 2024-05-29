@@ -37,6 +37,8 @@ class Settings:
         self.ups = 1
         self.running: bool = False
         self.level_points = 2000
+        self.time = 0
+        self.time_level = 2_000
         self.luck = 10
 
         # moving background
@@ -49,9 +51,9 @@ class Settings:
         # para criar inimigos/outros objetos
         self.TAMMINIMO = 40      # tamanho mínimo do rock
         self.TAMMAXIMO = 70      # tamanho máximo do rock
-        self.VELMINIMA = 3       # velocidade mínima do rock
-        self.VELMAXIMA = 10       # velocidade máxima do rock
-        self.ITERACOES = 60      # número de iterações antes de criar um novo rock  
+        self.VELMINIMA = 2       # velocidade mínima do rock
+        self.VELMAXIMA = 3       # velocidade máxima do rock
+        self.ITERACOES = 200      # número de iterações antes de criar um novo rock  
         
         #hacks
         self.hack = {'easy':'False', 'god':'False'}        
@@ -69,7 +71,9 @@ class Settings:
         
         # Carregando as imagens.       
         surf_ship = pygame.image.load('images/ship.png')
-        surf_ship = [surf_ship]        
+        surf_ship2 = pygame.image.load('images/ship2.png')
+        surf_ship3 = pygame.image.load('images/ship3.png')
+        surf_ship = [surf_ship, surf_ship3, surf_ship2]        
         
         # asteroids sprite map
         original_map = pygame.image.load('sprites/asteroids-arcade.png').convert_alpha()        
@@ -154,6 +158,10 @@ class Settings:
         surf_pow1 = space_map.subsurface((698, 67), (27, 31))
         surf_pows = [surf_pow1]
         
+        #add one more rocket type
+        surf_rocket2 = sprite_map.subsurface((512,298), (8, 11))
+        surf_rocket.append(surf_rocket2)
+        
         self.surf_player = {'ship':surf_ship, 'jets':surf_jets, 'rocket':surf_rocket,
                             'life':surf_lifes, 'ups':surf_ups, 'extra':surf_extra}        
         self.surf_enemy = {'asteroid':surf_asteroids, 'enemy1':surf_enemy1, 'rocket1':surf_fire,
@@ -184,6 +192,9 @@ class Settings:
         # Configurando o som.
         self.sound_over = pygame.mixer.Sound('sound/Raycast_lose.wav')
         self.sound_over.set_volume(0.3)
+        
+        self.sound_menu = pygame.mixer.Sound('sound/sinking2.ogg')
+        self.sound_menu.set_volume(0.3)
         
         self.sound_pow = pygame.mixer.Sound('sound/Raycast_start.wav')
         self.sound_pow.set_volume(0.5)

@@ -9,13 +9,13 @@ class Sprite(pygame.sprite.Sprite):
         self.pos = pos             #[x, y]        
         self.sounds = sounds
         
-        surfs_scaled = []
+        self.surfs_scaled = []
         for s in surfs:                
              surf = pygame.transform.scale(s, size)
              surf = pygame.transform.rotozoom(surf,rotate,1)
-             surfs_scaled.append(surf)
-        self.curr_surf = surfs_scaled[0]
-        self.list_surf = surfs_scaled     
+             self.surfs_scaled.append(surf)
+        self.curr_surf = self.surfs_scaled[0]
+        self.list_surf = self.surfs_scaled     
              
         self.col_rect = pygame.Rect(tuple(pos), tuple(size))    
         self.mask = pygame.mask.from_surface(self.curr_surf)
