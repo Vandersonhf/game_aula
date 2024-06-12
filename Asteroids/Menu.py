@@ -1,8 +1,10 @@
 from customtkinter import *
-from PIL import Image, ImageTk
+from PIL import Image
 from .Settings import settings
 import pygame
 from .SQL import *
+from .Socket import *
+import threading
 
 def set_tab1(w,h,tab):  
     frame = CTkFrame(master=tab, width=w, height=h, fg_color='#333333', corner_radius=3, border_width=2)
@@ -101,7 +103,9 @@ def set_start_exit(frame):
                 border_width=2, command=back_bt)
     b1.place(relx=0.5, rely=0.7, anchor='center')
     
-    def exit_bt(): 
+    def exit_bt():
+        #if settings.multiplayer and settings.server:
+        settings.open_connection = False
         pygame.quit()       
         exit()
         
@@ -150,12 +154,92 @@ def login_entry(w,h):
     b2.place(relx=0.5, rely=0.7, anchor='center')
     
     def exit_bt(): 
+        #if settings.multiplayer and settings.server:
+        settings.open_connection = False
         pygame.quit()       
         exit()
         
     b3 = CTkButton(master=frame, text='EXIT GAME', corner_radius=30, fg_color='transparent',
                 border_width=2, command=exit_bt)
     b3.place(relx=0.5, rely=0.8, anchor='center')
+    
+
+def online_entry(w,h):
+    frame = CTkFrame(master=settings.menu, width=w, height=h, fg_color='#333333', corner_radius=3, border_width=2)
+    frame.place(relx=0.5, rely=0.6, anchor='center')
+                  
+    l1 = CTkLabel(master=frame, text='MULTIPLAYER GAME',font=('Arial',25),text_color='#111111')
+    l1.place(relx=0.5, rely=0.2, anchor='center')
+    
+    entry1 = CTkEntry(master=frame, width=200, corner_radius=30, fg_color='transparent',
+                border_width=2, placeholder_text='server: ex. 192.168.0.100')
+    entry1.place(relx=0.5, rely=0.3, anchor='center')
+       
+    entry2 = CTkEntry(master=frame, width=200, corner_radius=30, fg_color='transparent',
+                border_width=2, placeholder_text='port: ex. 4040')
+    entry2.place(relx=0.5, rely=0.4, anchor='center')
+        
+    def join_bt():        
+        client_conn = Socket_client(entry1.get(), entry2.get())
+        client_conn.send_hi()        
+        
+    b1 = CTkButton(master=frame, text='JOIN GAME', corner_radius=30, fg_color='transparent',
+                border_width=2, command=join_bt)
+    b1.place(relx=0.5, rely=0.6, anchor='center')
+    
+    def check_hi():
+        #set some countdown    
+        while settings.last_message != 'hi':
+            pass
+        
+        print('Connected with client')
+        settings.last_message = None
+        settings.menu.destroy()
+        settings.menu.quit()
+    
+    def create_bt():
+        server_conn = Socket_server('0.0.0.0', settings.port)
+        settings.open_connection = True 
+        settings.server = threading.Thread(target=server_conn.receive)
+        settings.server.daemon = True
+        settings.server.start()
+        
+        l1 = CTkLabel(master=frame, text='WAITING PLAYER 2...',font=('Arial',20),text_color='#111111')
+        l1.place(relx=0.5, rely=0.45, anchor='center')
+        
+        # check hi signal
+        connect = threading.Thread(target=check_hi)            
+        connect.start()
+    
+    b2 = CTkButton(master=frame, text='CREATE GAME', corner_radius=30, fg_color='transparent',
+                border_width=2, command=create_bt)
+    b2.place(relx=0.5, rely=0.7, anchor='center')
+        
+    def exit_bt():
+        #if settings.multiplayer and settings.server:
+        settings.open_connection = False
+        pygame.quit()       
+        exit()
+        
+    b3 = CTkButton(master=frame, text='EXIT GAME', corner_radius=30, fg_color='transparent',
+                border_width=2, command=exit_bt)
+    b3.place(relx=0.5, rely=0.8, anchor='center')
+
+
+def menu_online():
+    settings.menu = CTk() 
+    set_appearance_mode('dark')
+    set_default_color_theme('blue')
+    w = settings.disp_size[0]
+    h = settings.disp_size[1]
+    
+    if settings.fullscreen:
+        settings.menu.attributes("-fullscreen", "True")
+        settings.menu.state('zoomed')
+
+    online_entry(w,h)
+    
+    settings.menu.mainloop()
 
     
 def menu_login():

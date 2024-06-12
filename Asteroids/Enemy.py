@@ -1,8 +1,6 @@
-#from .Settings import Settings
 from .Sprite import Sprite
 import pygame
 from .Settings import settings
-import random
 
 class Asteroid(Sprite):    
     def __init__(self, pos, size, speed):                       

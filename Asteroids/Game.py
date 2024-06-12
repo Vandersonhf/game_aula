@@ -1,8 +1,9 @@
-from .Player import Player
+from .Player import Player, Player2
 from .Enemy import Asteroid, Mob, Boss, PowerUP, ShieldUP
 from .Settings import settings
 from .Menu import *
 from .SQL import *
+from .Socket import *
 import pygame
 import random
 
@@ -10,26 +11,32 @@ class Game:
     def __init__(self):
         settings.load_resources()
         
-    def run(self): 
-        #run_launcher()       
+    def run(self):                
         menu = Basic_menu()
         select = menu.run()
         
         if select == 1:
-            self.login()
+            #self.login()
+            menu_login()
             self.new_game()
-        elif select == 2:
-            pass
+        elif select == 2: 
+            settings.multiplayer = True
+            #self.login()
+            menu_online()
+            if settings.server:
+                self.new_game()            
+            else:
+                # client mode
+                #send player pos to server
+                #get all lists of other elements
+                pass
         elif select == 3:
             run_menu()
             if not settings.running:
                self.new_game() 
         elif select == 4:
             self.exit()
-            
-    def login(self):
-        menu_login()        
-    
+       
     def new_game (self):
         while True:                             # laço externo do game over
             # Configurando o começo do jogo.
@@ -57,10 +64,16 @@ class Game:
             #create player           
             self.player = Player()
             pygame.mouse.set_pos(self.player.pos[0],self.player.pos[1])     # inicializando mouse posicao player
+            
+            #create player 2
+            if settings.multiplayer: self.player2 = Player2()
                                         
             #repetição principal
             self.main_loop()        # inicia novo jogo
                                     
+            # if game over close online connection
+            if settings.multiplayer: settings.open_connection = False                        
+            
             # Parando o jogo e mostrando a tela final.
             if self.boss != None and self.boss.dead: self.__menu_win__()        
             else: self.__menu_last__()
@@ -76,11 +89,11 @@ class Game:
             settings.running = self.check_events()
                         
             #criar inimigos   
-            #if self.level <= 5: 
-            self.counter = self.populate_asteroid(self.counter)            
+            if self.level <= 5: 
+                self.counter = self.populate_asteroid(self.counter)            
             self.counter2 = self.populate_mobs(self.counter2)
             
-             # preenchendo o fundo de janela com a sua imagem
+            # preenchendo o fundo de janela com a sua imagem
             self.draw_background()
             
             #atualiza inimigos                        
@@ -97,6 +110,10 @@ class Game:
             #atualiza jogador   
             self.player.update()
             settings.running = self.check_collision()
+            
+            #online
+            if settings.multiplayer and settings.server:
+                self.player2.update()
             
             #derrotou o boss
             if self.boss != None and self.boss.dead \
@@ -144,6 +161,9 @@ class Game:
         for evento in pygame.event.get():
             # Se for um evento QUIT
             if evento.type == pygame.QUIT:
+                #if settings.multiplayer and settings.server: 
+                settings.open_connection = False
+                pygame.quit()
                 self.exit()  
             if evento.type == pygame.KEYDOWN:
                 if evento.key == pygame.K_ESCAPE:
@@ -377,7 +397,7 @@ class Game:
                 type = 4
                 mob_surf = 'enemy4'
                 mob_fire_delay = 45
-            if self.level >= 5: 
+            if self.level == 5: 
                 type = 5
                 mob_surf = 'sub_boss'
                 mob_fire_delay = 40            

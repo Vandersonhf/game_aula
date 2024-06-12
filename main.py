@@ -1,4 +1,5 @@
-import Asteroids
+import Asteroids 
+from Asteroids.Socket import *
 
 if __name__ == '__main__':
     '''inicialização do jogo'''    

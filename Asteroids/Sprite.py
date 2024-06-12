@@ -1,4 +1,3 @@
-#from .Settings import *
 import pygame
 
 class Sprite(pygame.sprite.Sprite):

@@ -1,7 +1,5 @@
 import pygame
-#import tkinter as tk
 from customtkinter import *
-#from PIL import Image
 
 class Settings:        
     def __init__(self):
@@ -30,6 +28,14 @@ class Settings:
         self.font_size = 48 
         self.font = pygame.font.Font(None, self.font_size)
 
+        # online globals
+        self.multiplayer = False
+        self.server = None
+        self.port = 4040
+        self.open_connection = False
+        self.last_message = None
+        self.last_obj = None        
+        
         # game globals
         self.score: int = 0
         self.hi_score: int = 0
