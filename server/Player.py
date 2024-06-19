@@ -81,10 +81,10 @@ class Player(Sprite):
         self.rockets.update()
         
         # desenhando jogador(nave). 
-        if settings.ups >= 3 and settings.ups < 5:
+        '''if settings.ups >= 3 and settings.ups < 5:
             self.curr_surf = self.surfs_scaled[1]
         elif settings.ups == 5:
-            self.curr_surf = self.surfs_scaled[2]
+            self.curr_surf = self.surfs_scaled[2]'''
         self.draw(settings)  
         
         #draw shield        
@@ -212,9 +212,12 @@ class Player2(Sprite):
         # Inicializa posição.
         dx = self.col_rect.centerx
         dy = self.col_rect.centery
-        self.col_rect.move_ip(pos[0] - dx, pos[1] - dy)        
+        self.col_rect.move_ip(pos[0] - dx, pos[1] - dy + 100)        
         for comp in self.components:
-            comp.col_rect.move_ip(pos[0] - dx, pos[1] - dy)
+            comp.col_rect.move_ip(pos[0] - dx, pos[1] - dy + 100)
+                    
+        #change ship sprite
+        self.curr_surf = self.surfs_scaled[1]
     
     # definindo a função mover(), que registra a posição de um jogador
     def move(self):  
@@ -262,9 +265,17 @@ class Player2(Sprite):
                
         # Movimentando a nave  
         if settings.last_message:
-             seta = settings.last_message
-             if seta == 'esquerda':
-                 self.teclas[seta] = True
+            message = settings.last_message
+            # messages down_esquerda up_esquerda down_direita ....
+            split = str.split(message,'_')
+            type = split[0]
+            seta = split[1]
+            press = True if 'down' else False
+            if seta == 'espaco':
+                self.new_rocket()
+            else:
+                self.teclas[seta] = press            
+                
         self.move()
                   
         #desenhando componentes e etc.
@@ -272,10 +283,10 @@ class Player2(Sprite):
         self.rockets.update()
         
         # desenhando jogador(nave). 
-        if settings.ups >= 3 and settings.ups < 5:
+        '''if settings.ups >= 3 and settings.ups < 5:
             self.curr_surf = self.surfs_scaled[1]
         elif settings.ups == 5:
-            self.curr_surf = self.surfs_scaled[2]
+            self.curr_surf = self.surfs_scaled[2]'''
         self.draw(settings)  
         
         #draw shield        

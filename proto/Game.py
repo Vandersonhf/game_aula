@@ -15,13 +15,12 @@ class Game:
         menu = Basic_menu()
         select = menu.run()
         
-        if select == 1:
-            #self.login()
+        if select == 1:            
             menu_login()
             self.new_game()
         elif select == 2: 
-            settings.multiplayer = True
-            #self.login()
+            settings.multiplayer = True            
+            menu_login()
             menu_online()
             if settings.server:
                 self.new_game()            

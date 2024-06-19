@@ -1,8 +1,7 @@
-import proto 
-from proto.Socket import *
+import client 
+from client.Socket import *
 
 if __name__ == '__main__':
     '''inicialização do jogo'''    
     
-    proto.run_game()
-    
+    client.run_game()
