@@ -18,7 +18,7 @@ class Settings:
         #set window           
         self.menu = CTk()  
         #self.menu.resizable(width=False, height=False)           
-        self.disp_size = (self.menu.winfo_screenwidth()/2, self.menu.winfo_screenheight()/2)   
+        self.disp_size = (int(self.menu.winfo_screenwidth()/2), int(self.menu.winfo_screenheight()/2))
         self.window = pygame.display.set_mode(self.disp_size)
         pygame.display.set_caption(name)
 

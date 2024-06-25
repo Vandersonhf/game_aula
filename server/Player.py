@@ -270,12 +270,12 @@ class Player2(Sprite):
             split = str.split(message,'_')
             type = split[0]
             seta = split[1]
-            press = True if 'down' else False
+            press = True if type =='down' else False
             if seta == 'espaco':
                 self.new_rocket()
             else:
                 self.teclas[seta] = press            
-                
+        settings.last_message = None        
         self.move()
                   
         #desenhando componentes e etc.

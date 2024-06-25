@@ -10,7 +10,7 @@ import random
 class Game: 
     def __init__(self):
         settings.load_resources()
-        
+            
     def run(self):                
         menu = Basic_menu()
         select = menu.run()
@@ -22,14 +22,7 @@ class Game:
             settings.multiplayer = True            
             menu_login()
             menu_online()
-            if settings.server:
-                self.new_game()            
-            else:
-                # client mode
-                #send player pos to server
-                #get all lists of other elements
-                self.print_server_screen()
-                pass
+            self.print_server_screen()               
         elif select == 3:
             run_menu()
             if not settings.running:
@@ -37,38 +30,27 @@ class Game:
         elif select == 4:
             self.exit()
     
-    def print_server_screen(self):  
-        # connection to receive frames
-        server_conn = Socket_server('0.0.0.0', settings.port2)
-        settings.open_connection = True 
-        settings.server = threading.Thread(target=server_conn.receive_frame)
-        settings.server.daemon = True
-        settings.server.start()
-           
-        #buffer    
-        while settings.frame_idx < settings.max_buffer:
-            if settings.frame:
-                settings.frame_list.append(settings.frame)
-                settings.frame_idx += 1
-        
-                
+    def print_server_screen(self):
         self.client_loop()       
     
     def client_loop (self):
-        ''' new game'''
+        ''' client side'''
+        settings.running = True
         while settings.running:
             #verifica eventos e atualiza em memória       
             settings.running = self.check_client_events()
                       
             #set frame to display
-            settings.window.blit(self.frame_list.pop(0), (0,0))
+            if len(settings.frame_list) > 0:
+                settings.window.blit(settings.frame_list.pop(0), (0,0))
             #settings.frame_idx -= 1
           
             # mostrando na tela tudo o que foi desenhado            
-            pygame.display.update()    
+            #pygame.display.update()    
+            pygame.display.flip()
                 
             # limitando a 60 quadros por segundo
-            settings.clock.tick(settings.fps)
+            #settings.clock.tick(settings.fps)
     
     def check_client_events(self):
         #print("Tratando...")
@@ -80,10 +62,11 @@ class Game:
                 pygame.quit()
                 self.exit()  
             if evento.type == pygame.KEYDOWN:
+                self.socket = Socket_client(settings.host, settings.port)
                 if evento.key == pygame.K_ESCAPE:
                     run_menu()
                     #self.exit()   
-                if evento.key == pygame.K_LEFT or evento.key == pygame.K_a:                    
+                if evento.key == pygame.K_LEFT or evento.key == pygame.K_a:                                                           
                     self.socket.send('down_esquerda')
                     #self.player.teclas['esquerda'] = True
                 if evento.key == pygame.K_RIGHT or evento.key == pygame.K_d:
@@ -101,6 +84,7 @@ class Game:
                             
             # quando uma tecla é solta
             if evento.type == pygame.KEYUP:
+                self.socket = Socket_client(settings.host, settings.port)
                 if evento.key == pygame.K_LEFT or evento.key == pygame.K_a:
                     self.socket.send('up_esquerda')
                     #self.player.teclas['esquerda'] = False

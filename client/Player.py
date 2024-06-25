@@ -162,7 +162,6 @@ class Jet(Sprite):
         
         
         
-        
 class Rocket(Sprite):    
     def __init__(self, pos, size, speed, rotate=0):
         super().__init__(size, pos, settings.surf_player['rocket'],

@@ -16,7 +16,7 @@ class Sprite(pygame.sprite.Sprite):
         self.curr_surf = self.surfs_scaled[0]
         self.list_surf = self.surfs_scaled     
              
-        self.col_rect = pygame.Rect(tuple(pos), tuple(size))    
+        self.col_rect = pygame.Rect(tuple(pos), tuple(size)) 
         self.mask = pygame.mask.from_surface(self.curr_surf)
         
         self.idx_ani = 0        

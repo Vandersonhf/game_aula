@@ -13,6 +13,8 @@ class Settings:
         self.frame_list = []
         self.max_buffer = 10
         self.frame_idx = 0
+        self.host = None
+        self.port = None
 
         pygame.init()       # inicializando pygame
         pygame.display.init()        
@@ -24,7 +26,7 @@ class Settings:
         #set window           
         self.menu = CTk()  
         #self.menu.resizable(width=False, height=False)           
-        self.disp_size = (self.menu.winfo_screenwidth()/2, self.menu.winfo_screenheight()/2)        
+        self.disp_size = (int(self.menu.winfo_screenwidth()/2), int(self.menu.winfo_screenheight()/2))        
         self.window = pygame.display.set_mode(self.disp_size)
         pygame.display.set_caption(name)
 
@@ -40,6 +42,7 @@ class Settings:
         self.port = 4040
         self.port2 = 4041
         self.open_connection = False
+        self.open_connection2 = False
         self.last_message = None
         self.last_obj = None        
         

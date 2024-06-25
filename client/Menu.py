@@ -156,6 +156,9 @@ def login_entry(w,h):
     def exit_bt(): 
         #if settings.multiplayer and settings.server:
         settings.open_connection = False
+        settings.open_connection2 = False
+        settings.menu.destroy()
+        settings.menu.quit()
         pygame.quit()       
         exit()
         
@@ -180,44 +183,29 @@ def online_entry(w,h):
     entry2.place(relx=0.5, rely=0.4, anchor='center')
         
     def join_bt():        
-        client_conn = Socket_client(entry1.get(), entry2.get())
-        client_conn.send('hi')        
+        server_conn = Socket_server('0.0.0.0', settings.port2)        
+        settings.server = threading.Thread(target=server_conn.receive_frame_TCP)
+        settings.server.daemon = True
+        settings.server.start()
+        
+        settings.host = str(entry1.get())
+        settings.port = int(entry2.get())
+        client_conn = Socket_client(settings.host, settings.port)
+        client_conn.send('hi') 
+        
+        settings.menu.destroy()
+        settings.menu.quit()      
         
     b1 = CTkButton(master=frame, text='JOIN GAME', corner_radius=30, fg_color='transparent',
                 border_width=2, command=join_bt)
     b1.place(relx=0.5, rely=0.6, anchor='center')
-    
-    def check_hi():
-        #set some countdown    
-        while settings.last_message != 'hi':
-            pass
-        
-        print('Connected with client')
-        settings.last_message = None
-        settings.menu.destroy()
-        settings.menu.quit()
-    
-    def create_bt():
-        server_conn = Socket_server('0.0.0.0', settings.port)
-        settings.open_connection = True 
-        settings.server = threading.Thread(target=server_conn.receive)
-        settings.server.daemon = True
-        settings.server.start()
-        
-        l1 = CTkLabel(master=frame, text='WAITING PLAYER 2...',font=('Arial',20),text_color='#111111')
-        l1.place(relx=0.5, rely=0.45, anchor='center')
-        
-        # check hi signal
-        connect = threading.Thread(target=check_hi)            
-        connect.start()
-    
-    b2 = CTkButton(master=frame, text='CREATE GAME', corner_radius=30, fg_color='transparent',
-                border_width=2, command=create_bt)
-    b2.place(relx=0.5, rely=0.7, anchor='center')
-        
+            
     def exit_bt():
         #if settings.multiplayer and settings.server:
         settings.open_connection = False
+        settings.open_connection2 = False
+        settings.menu.destroy()
+        settings.menu.quit()
         pygame.quit()       
         exit()
         

@@ -22,13 +22,10 @@ class Game:
             settings.multiplayer = True            
             menu_login()
             menu_online()
-            if settings.server:
-                self.new_game()            
-            else:
-                # client mode
-                #send player pos to server
-                #get all lists of other elements
-                pass
+            camera = threading.Thread(target=self.capture_send_frame)
+            #camera.daemon = True
+            camera.start()
+            self.new_game() 
         elif select == 3:
             run_menu()
             if not settings.running:
@@ -37,6 +34,8 @@ class Game:
             self.exit()
        
     def new_game (self):
+        
+        
         while True:                             # laço externo do game over
             # Configurando o começo do jogo.
             self.asteroids = pygame.sprite.Group()  # lista com os asteroids   
@@ -65,17 +64,26 @@ class Game:
             pygame.mouse.set_pos(self.player.pos[0],self.player.pos[1])     # inicializando mouse posicao player
             
             #create player 2
-            if settings.multiplayer: self.player2 = Player2()
-                                        
+            if settings.multiplayer: 
+                self.player2 = Player2()
+                                    
             #repetição principal
             self.main_loop()        # inicia novo jogo
                                     
             # if game over close online connection
-            if settings.multiplayer: settings.open_connection = False                        
+            #if settings.multiplayer: settings.open_connection = False                        
             
             # Parando o jogo e mostrando a tela final.
             if self.boss != None and self.boss.dead: self.__menu_win__()        
             else: self.__menu_last__()
+            
+    def capture_send_frame(self):
+        while True:
+            frame = pygame.display.get_surface() 
+            #print(f'frame size: {frame.get_size()}')
+            self.socket = Socket_client('localhost', 4041)                
+            self.socket.send_frame_TCP(frame)
+     
         
     def main_loop (self):
         ''' new game'''
@@ -111,11 +119,8 @@ class Game:
             settings.running = self.check_collision()
             
             #online
-            if settings.multiplayer and settings.server:
-                self.player2.update()
-                frame = pygame.display.get_surface() 
-                socket = Socket_client('localhost', 4041)
-                socket.send_frame(frame)
+            if settings.multiplayer:
+                self.player2.update()                           
             
             #derrotou o boss
             if self.boss != None and self.boss.dead \
@@ -128,27 +133,8 @@ class Game:
                 settings.hi_score = settings.score
                 sql_update(settings.hi_score)                 
                 
-            # verifica aumento de velocidade
-            #if (self.level==0 or settings.score > self.level * settings.level_points) \
-            if (self.level==0 or settings.time > settings.time_level)\
-                    and self.level_counter==120:
-                self.level_check = True 
-                settings.time = 0               
-            if self.level_check:                
-                if self.level_counter>0:
-                    self.level_counter -=1
-                    pos = settings.disp_size
-                    offset = settings.font_size
-                    if self.level>= 0 and self.level<5: 
-                        self.print_text('LEVEL '+str(self.level+1), (pos[0]/2),(pos[1]/2)-offset, 'center') 
-                    elif self.level == 5: 
-                        self.print_text('FINAL STAGE ', (pos[0]/2),(pos[1]/2)-offset, 'center')
-                else:    
-                    settings.VELMINIMA = settings.VELMINIMA + (self.level)
-                    if settings.VELMINIMA > settings.VELMAXIMA: settings.VELMINIMA = settings.VELMAXIMA                    
-                    self.level_check = False
-                    self.level += 1
-                    self.level_counter=120
+            # verifica nivel game
+            self.check_level()
             
             # mostrando na tela tudo o que foi desenhado
             pygame.display.flip()
@@ -157,6 +143,27 @@ class Game:
             # limitando a 60 quadros por segundo
             settings.clock.tick(settings.fps)
        
+    
+    def check_level(self):
+        if (self.level==0 or settings.time > settings.time_level)\
+                    and self.level_counter==120:
+            self.level_check = True 
+            settings.time = 0               
+        if self.level_check:                
+            if self.level_counter>0:
+                self.level_counter -=1
+                pos = settings.disp_size
+                offset = settings.font_size
+                if self.level>= 0 and self.level<5: 
+                    self.print_text('LEVEL '+str(self.level+1), (pos[0]/2),(pos[1]/2)-offset, 'center') 
+                elif self.level == 5: 
+                    self.print_text('FINAL STAGE ', (pos[0]/2),(pos[1]/2)-offset, 'center')
+            else:    
+                settings.VELMINIMA = settings.VELMINIMA + (self.level)
+                if settings.VELMINIMA > settings.VELMAXIMA: settings.VELMINIMA = settings.VELMAXIMA                    
+                self.level_check = False
+                self.level += 1
+                self.level_counter=120
     
     def check_events(self):
         #print("Tratando...")
