@@ -185,7 +185,7 @@ def online_entry(w,h):
     def join_bt():        
         server_conn = Socket_server('0.0.0.0', settings.port2)        
         settings.server = threading.Thread(target=server_conn.receive_frame_TCP)
-        settings.server.daemon = True
+        #settings.server.daemon = True
         settings.server.start()
         
         settings.host = str(entry1.get())
