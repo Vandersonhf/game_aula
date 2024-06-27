@@ -21,20 +21,43 @@ class Socket_server:
                 data = self.conn.recv(128)
                 message = data.decode()                           
                 settings.last_message = message
-                
+
+
+class Socket_server_controls:
+    def __init__(self, host, port):
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)   
+        self.host = host
+        self.port = port
+    
+    def receive_controls(self):
+        self.socket.bind((self.host, self.port))
+        self.socket.listen(1)
+        print('Server up! CONTROLS')  
+        self.conn, addr = self.socket.accept()
+        #print(f'received connection from {addr}  SIZE BUFFER ') 
+        with self.conn:     
+            while True:               
+                data = self.conn.recv(15)
+                control = data.decode()                
+                if len(settings.buffer_controls) < settings.max_buffer:
+                    settings.buffer_controls.append(control)
+                   
     
 class Socket_client():
-    def __init__(self, host, port):
+    def __init__(self, host, port, size):
         self.socket = socket.socket()    
         self.host = host
-        self.port = port        
+        self.port = port    
+        with self.socket:
+            self.socket.connect((self.host, self.port+1))
+            print(f'sending bytes {size}')
+            self.socket.send(str(size).encode())
+            
+        self.socket = socket.socket()
+        self.socket.connect((self.host, self.port))
                    
     def send_frame_TCP(self, frame):    
-        #print(f'sending to {self.host}:{self.port}')
-        self.socket.connect((self.host, self.port))
-        with self.socket: 
-            data_string = pygame.image.tostring(frame, "RGB")
-            #print(f'sending bytes {len(data_string)}')
-            self.socket.send(data_string)
+        data_string = pygame.image.tostring(frame, "RGB")
+        self.socket.send(data_string)
     
     

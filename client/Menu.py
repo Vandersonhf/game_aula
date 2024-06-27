@@ -123,10 +123,12 @@ def login_entry(w,h):
     entry1 = CTkEntry(master=frame, corner_radius=30, fg_color='transparent',
                 border_width=2, placeholder_text='login')
     entry1.place(relx=0.5, rely=0.3, anchor='center')
+    entry1.insert(0,'user')
        
     entry2 = CTkEntry(master=frame, corner_radius=30, fg_color='transparent',
-                border_width=2, placeholder_text='pass')
+                border_width=2, placeholder_text='password',show = '*')
     entry2.place(relx=0.5, rely=0.4, anchor='center')
+    entry2.insert(0,'123')
         
     def login_bt(): 
         settings.name = entry1.get()
@@ -176,13 +178,20 @@ def online_entry(w,h):
     
     entry1 = CTkEntry(master=frame, width=200, corner_radius=30, fg_color='transparent',
                 border_width=2, placeholder_text='server: ex. 192.168.0.100')
-    entry1.place(relx=0.5, rely=0.3, anchor='center')
+    entry1.place(relx=0.5, rely=0.4, anchor='center')
+    entry1.insert(0,'localhost')
        
     entry2 = CTkEntry(master=frame, width=200, corner_radius=30, fg_color='transparent',
                 border_width=2, placeholder_text='port: ex. 4040')
-    entry2.place(relx=0.5, rely=0.4, anchor='center')
+    entry2.place(relx=0.5, rely=0.5, anchor='center')
+    entry2.insert(0,4040)
         
-    def join_bt():        
+    def join_bt():
+        server_conn_BUFF = Socket_server('0.0.0.0', settings.port2)        
+        server_BUFF = threading.Thread(target=server_conn_BUFF.receive_buffer_size)
+        #settings.server.daemon = True
+        server_BUFF.start()  
+          
         server_conn = Socket_server('0.0.0.0', settings.port2)        
         settings.server = threading.Thread(target=server_conn.receive_frame_TCP)
         #settings.server.daemon = True
@@ -193,12 +202,15 @@ def online_entry(w,h):
         client_conn = Socket_client(settings.host, settings.port)
         client_conn.send('hi') 
         
+        while not settings.TCP_buffer:
+            pass
+        
         settings.menu.destroy()
         settings.menu.quit()      
         
     b1 = CTkButton(master=frame, text='JOIN GAME', corner_radius=30, fg_color='transparent',
                 border_width=2, command=join_bt)
-    b1.place(relx=0.5, rely=0.6, anchor='center')
+    b1.place(relx=0.5, rely=0.7, anchor='center')
             
     def exit_bt():
         #if settings.multiplayer and settings.server:
@@ -215,11 +227,15 @@ def online_entry(w,h):
 
 
 def menu_online():
-    settings.menu = CTk() 
+    settings.menu = CTk()
     set_appearance_mode('dark')
     set_default_color_theme('blue')
-    w = settings.disp_size[0]
-    h = settings.disp_size[1]
+    w = int(settings.disp_size[0]/2)
+    h = int(settings.disp_size[1]/2)
+    x = settings.disp_size[0]
+    y = settings.disp_size[1]
+    s = f'{w}x{h}+{x}+{y}'
+    settings.menu.geometry(s)
     
     if settings.fullscreen:
         settings.menu.attributes("-fullscreen", "True")
@@ -231,11 +247,15 @@ def menu_online():
 
     
 def menu_login():
-    settings.menu = CTk() 
+    settings.menu = CTk()     
     set_appearance_mode('dark')
     set_default_color_theme('blue')
-    w = settings.disp_size[0]
-    h = settings.disp_size[1]
+    w = int(settings.disp_size[0]/2)
+    h = int(settings.disp_size[1]/2)
+    x = settings.disp_size[0]
+    y = settings.disp_size[1]
+    s = f'{w}x{h}+{x}+{y}'
+    settings.menu.geometry(s)
     
     if settings.fullscreen:
         settings.menu.attributes("-fullscreen", "True")

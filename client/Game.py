@@ -22,7 +22,8 @@ class Game:
             settings.multiplayer = True            
             menu_login()
             menu_online()
-            self.print_server_screen()               
+            self.socket = Socket_client_controls('localhost', 4039)
+            self.client_loop()               
         elif select == 3:
             run_menu()
             if not settings.running:
@@ -30,27 +31,21 @@ class Game:
         elif select == 4:
             self.exit()
     
-    def print_server_screen(self):
-        self.client_loop()       
-    
     def client_loop (self):
         ''' client side'''
         settings.running = True
         while settings.running:
             #verifica eventos e atualiza em memória       
             settings.running = self.check_client_events()
-                      
+            
             #set frame to display
             if len(settings.frame_list) > 0:
                 settings.window.blit(settings.frame_list.pop(0), (0,0))
-            #settings.frame_idx -= 1
-          
-            # mostrando na tela tudo o que foi desenhado            
-            #pygame.display.update()    
-            pygame.display.flip()
                 
-            # limitando a 60 quadros por segundo
-            #settings.clock.tick(settings.fps)
+            # mostrando na tela tudo o que foi desenhado 
+            pygame.display.flip()
+            
+            
     
     def check_client_events(self):
         #print("Tratando...")
@@ -62,40 +57,40 @@ class Game:
                 pygame.quit()
                 self.exit()  
             if evento.type == pygame.KEYDOWN:
-                self.socket = Socket_client(settings.host, settings.port)
+                #self.socket = Socket_client(settings.host, settings.port)
                 if evento.key == pygame.K_ESCAPE:
                     run_menu()
                     #self.exit()   
                 if evento.key == pygame.K_LEFT or evento.key == pygame.K_a:                                                           
-                    self.socket.send('down_esquerda')
+                    self.socket.send('0_down_esquerda')
                     #self.player.teclas['esquerda'] = True
                 if evento.key == pygame.K_RIGHT or evento.key == pygame.K_d:
-                    self.socket.send('down_direita')
+                    self.socket.send('00_down_direita')
                     #self.player.teclas['direita'] = True
                 if evento.key == pygame.K_UP or evento.key == pygame.K_w:
-                    self.socket.send('down_cima')
+                    self.socket.send('00000_down_cima')
                     #self.player.teclas['cima'] = True
                 if evento.key == pygame.K_DOWN or evento.key == pygame.K_s:
-                    self.socket.send('down_baixo')
+                    self.socket.send('0000_down_baixo')
                     #self.player.teclas['baixo'] = True
                 if evento.key == pygame.K_SPACE:                                           
-                    self.socket.send('down_espaco')
+                    self.socket.send('000_down_espaco')
                     #self.player.new_rocket()
                             
             # quando uma tecla é solta
             if evento.type == pygame.KEYUP:
-                self.socket = Socket_client(settings.host, settings.port)
+                #self.socket = Socket_client(settings.host, settings.port)
                 if evento.key == pygame.K_LEFT or evento.key == pygame.K_a:
-                    self.socket.send('up_esquerda')
+                    self.socket.send('000_up_esquerda')
                     #self.player.teclas['esquerda'] = False
                 if evento.key == pygame.K_RIGHT or evento.key == pygame.K_d:
-                    self.socket.send('up_direita')
+                    self.socket.send('0000_up_direita')
                     #self.player.teclas['direita'] = False
                 if evento.key == pygame.K_UP or evento.key == pygame.K_w:
-                    self.socket.send('up_cima')
+                    self.socket.send('0000000_up_cima')
                     #self.player.teclas['cima'] = False
                 if evento.key == pygame.K_DOWN or evento.key == pygame.K_s:
-                    self.socket.send('up_baixo')
+                    self.socket.send('000000_up_baixo')
                     #self.player.teclas['baixo'] = False
                                     
         return True

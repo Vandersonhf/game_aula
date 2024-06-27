@@ -140,7 +140,7 @@ def set_start_exit(frame):
  
 def login_entry(w,h):
     frame = CTkFrame(master=settings.menu, width=w, height=h, fg_color='#333333', corner_radius=3, border_width=2)
-    frame.place(relx=0.5, rely=0.6, anchor='center')
+    frame.place(relx=0.5, rely=0.5, anchor='center')
                   
     l1 = CTkLabel(master=frame, text='LOGIN',font=('Arial',20),text_color='#111111')
     l1.place(relx=0.5, rely=0.2, anchor='center')
@@ -148,10 +148,12 @@ def login_entry(w,h):
     entry1 = CTkEntry(master=frame, corner_radius=30, fg_color='transparent',
                 border_width=2, placeholder_text='login')
     entry1.place(relx=0.5, rely=0.3, anchor='center')
+    entry1.insert(0,'user')
        
     entry2 = CTkEntry(master=frame, corner_radius=30, fg_color='transparent',
                 border_width=2, placeholder_text='password',show = '*')
     entry2.place(relx=0.5, rely=0.4, anchor='center')
+    entry2.insert(0,'123')
         
     def login_bt(): 
         settings.name = entry1.get()
@@ -193,7 +195,7 @@ def login_entry(w,h):
 
 def online_entry(w,h):
     frame = CTkFrame(master=settings.menu, width=w, height=h, fg_color='#333333', corner_radius=3, border_width=2)
-    frame.place(relx=0.5, rely=0.6, anchor='center')
+    frame.place(relx=0.5, rely=0.5, anchor='center')
                   
     l1 = CTkLabel(master=frame, text='MULTIPLAYER GAME',font=('Arial',25),text_color='#111111')
     l1.place(relx=0.5, rely=0.2, anchor='center')
@@ -240,11 +242,15 @@ def online_entry(w,h):
 
 
 def menu_online():
-    settings.menu = CTk() 
+    settings.menu = CTk()     
     set_appearance_mode('dark')
     set_default_color_theme('blue')
-    w = settings.disp_size[0]
-    h = settings.disp_size[1]
+    w = int(settings.disp_size[0]/2)
+    h = int(settings.disp_size[1]/2)
+    x = int(w/2)
+    y = int(h/2)
+    s = f'{w}x{h}+{x}+{y}'
+    settings.menu.geometry(s)
     
     if settings.fullscreen:
         settings.menu.attributes("-fullscreen", "True")
@@ -256,11 +262,15 @@ def menu_online():
 
     
 def menu_login():
-    settings.menu = CTk() 
+    settings.menu = CTk()     
     set_appearance_mode('dark')
     set_default_color_theme('blue')
-    w = settings.disp_size[0]
-    h = settings.disp_size[1]
+    w = int(settings.disp_size[0]/2)
+    h = int(settings.disp_size[1]/2)
+    x = int(w/2)
+    y = int(h/2)
+    s = f'{w}x{h}+{x}+{y}'
+    settings.menu.geometry(s)
     
     if settings.fullscreen:
         settings.menu.attributes("-fullscreen", "True")

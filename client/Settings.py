@@ -1,5 +1,7 @@
 import pygame
 from customtkinter import *
+#from screeninfo import get_monitors
+import os
 
 class Settings:        
     def __init__(self):
@@ -7,14 +9,33 @@ class Settings:
         name:str = 'Asteroids'
         self.fullscreen:bool = False
         self.fps:int = 60
+
+        #set window           
+        self.menu = CTk()  
+        #self.menu.resizable(width=False, height=False)   
+        self.screen = (self.menu.winfo_screenwidth(), self.menu.winfo_screenheight())        
+        self.disp_size = (int(self.screen[0]/2), int(self.screen[1]/2))
+        
+        # Get the bounds of the users monitors, and select the first one
+        #monitors = get_monitors() # Get the resolution of all of the users monitors
+        #screen_width = monitors[0].width # Get width of first monitor found
+        #screen_height = monitors[0].height # Get height of first monitor found
+
+        # Set the x and y coordinates of the pygame window in relation to the monitor's resolution 
+        # (I wanted my pygame window to be located in the bottom-right of the monitor)
+        pos_x = self.screen[0] - self.disp_size[0] # Calculate the x-location
+        pos_y = self.screen[1] - self.disp_size[1] - 50 # Calculate the y-location
+        os.environ['SDL_VIDEO_WINDOW_POS'] = '%i,%i' % (pos_x,pos_y) # Set pygame window location
+
         
         #client frame
         self.frame = None
         self.frame_list = []
-        self.max_buffer = 10
-        self.frame_idx = 0
+        self.max_buffer = 20
+        self.frame_segment = 1024 #262144   #131072
         self.host = None
         self.port = None
+        self.TCP_buffer = None
 
         pygame.init()       # inicializando pygame
         pygame.display.init()        
@@ -24,9 +45,6 @@ class Settings:
         pygame.mouse.set_visible(False)             
             
         #set window           
-        self.menu = CTk()  
-        #self.menu.resizable(width=False, height=False)           
-        self.disp_size = (int(self.menu.winfo_screenwidth()/2), int(self.menu.winfo_screenheight()/2))        
         self.window = pygame.display.set_mode(self.disp_size)
         pygame.display.set_caption(name)
 

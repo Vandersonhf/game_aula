@@ -1,5 +1,7 @@
 import pygame
 from customtkinter import *
+#from screeninfo import get_monitors
+import os
 
 class Settings:        
     def __init__(self):
@@ -8,6 +10,24 @@ class Settings:
         self.fullscreen:bool = False
         self.fps:int = 60
 
+        #set window           
+        self.menu = CTk()  
+        #self.menu.resizable(width=False, height=False)   
+        self.screen = (self.menu.winfo_screenwidth(), self.menu.winfo_screenheight())        
+        self.disp_size = (int(self.screen[0]/2), int(self.screen[1]/2))
+        
+        # Get the bounds of the users monitors, and select the first one
+        #monitors = get_monitors() # Get the resolution of all of the users monitors
+        #screen_width = monitors[0].width # Get width of first monitor found
+        #screen_height = monitors[0].height # Get height of first monitor found
+
+        # Set the x and y coordinates of the pygame window in relation to the monitor's resolution 
+        # (I wanted my pygame window to be located in the bottom-right of the monitor)
+        pos_x = self.screen[0] - self.disp_size[0] # Calculate the x-location
+        pos_y = self.screen[1] - self.disp_size[1] # Calculate the y-location
+        os.environ['SDL_VIDEO_WINDOW_POS'] = '%i,%i' % (0,0) # Set pygame window location
+
+
         pygame.init()       # inicializando pygame
         pygame.display.init()        
         self.clock = pygame.time.Clock() 
@@ -15,10 +35,6 @@ class Settings:
         # Ocultando o cursor 
         pygame.mouse.set_visible(False)             
             
-        #set window           
-        self.menu = CTk()  
-        #self.menu.resizable(width=False, height=False)           
-        self.disp_size = (int(self.menu.winfo_screenwidth()/2), int(self.menu.winfo_screenheight()/2))
         self.window = pygame.display.set_mode(self.disp_size)
         pygame.display.set_caption(name)
 
@@ -33,14 +49,19 @@ class Settings:
         self.server = None
         self.port = 4040
         self.open_connection = False
+        self.buffer_controls = []
         self.last_message = None
+        self.max_buffer = 10
         self.last_obj = None        
         
         # game globals
         self.score: int = 0
+        self.score2: int = 0
         self.hi_score: int = 0
         self.life = 3
+        self.life2 = 3
         self.ups = 1
+        self.ups2 = 1
         self.running: bool = False
         self.level_points = 2000
         self.time = 0

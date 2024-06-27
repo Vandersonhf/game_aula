@@ -250,52 +250,47 @@ class Player2(Sprite):
         self.counter += 1 
         # verificando extra power ups
         size = (settings.surf_player['extra'][0].get_width(), settings.surf_player['extra'][0].get_height())
-        if settings.ups == 2 and len(self.components)<settings.ups:            
+        if settings.ups2 == 2 and len(self.components)<settings.ups2:            
             pos = [self.col_rect.center[0]+50, self.col_rect.top-20]            
             self.components.add(Power(pos, size, self.speed, rotate = -15))
-        elif settings.ups == 3 and len(self.components)<settings.ups:
+        elif settings.ups2 == 3 and len(self.components)<settings.ups2:
             pos = [self.col_rect.center[0]-50, self.col_rect.top-20]
             self.components.add(Power(pos, size, self.speed, rotate = 15))
-        elif settings.ups == 4 and len(self.components)<settings.ups:
+        elif settings.ups2 == 4 and len(self.components)<settings.ups2:
             pos = [self.col_rect.center[0]-100, self.col_rect.top-20]
             self.components.add(Power(pos, size, self.speed, rotate = 30))
-        elif settings.ups == 5 and len(self.components)<settings.ups:
+        elif settings.ups2 == 5 and len(self.components)<settings.ups2:
             pos = [self.col_rect.center[0]+100, self.col_rect.top-20]
             self.components.add(Power(pos, size, self.speed, rotate = -30))       
                
         # Movimentando a nave  
-        if settings.last_message:
-            message = settings.last_message
+        if len(settings.buffer_controls) > 0:
+            control = settings.buffer_controls.pop(0)
             # messages down_esquerda up_esquerda down_direita ....
-            split = str.split(message,'_')
-            type = split[0]
-            seta = split[1]
+            split = str.split(control,'_')
+            type = split[1]
+            seta = split[2]
             press = True if type =='down' else False
             if seta == 'espaco':
                 self.new_rocket()
             else:
-                self.teclas[seta] = press            
-        settings.last_message = None        
+                self.teclas[seta] = press   
         self.move()
                   
         #desenhando componentes e etc.
         self.components.update()
         self.rockets.update()
         
-        # desenhando jogador(nave). 
-        '''if settings.ups >= 3 and settings.ups < 5:
-            self.curr_surf = self.surfs_scaled[1]
-        elif settings.ups == 5:
-            self.curr_surf = self.surfs_scaled[2]'''
+        # desenhando jogador(nave)         
         self.draw(settings)  
         
         #draw shield        
         center = list(self.col_rect.center)
         center[1] = center[1]+10
-        if settings.life == 3:            
+        if settings.life2 == 3:            
             pygame.draw.circle(settings.window, 'blue', center, 50, width=1)
             pygame.draw.circle(settings.window, 'blue', center, 45, width=1)             
-        elif settings.life == 2:    
+        elif settings.life2 == 2:    
             pygame.draw.circle(settings.window, 'blue', center, 45, width=1)
               
     
@@ -305,7 +300,7 @@ class Player2(Sprite):
             size = (settings.surf_player['rocket'][0].get_width(), settings.surf_player['rocket'][0].get_height())
             #speed = [0,-15]
             rotate = 0
-            for i in range(1,settings.ups+1): 
+            for i in range(1,settings.ups2+1): 
                 if i == 1: 
                     pos[0] = self.col_rect.centerx           
                     speed = [0,-15]

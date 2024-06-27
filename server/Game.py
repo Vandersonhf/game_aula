@@ -21,10 +21,12 @@ class Game:
         elif select == 2: 
             settings.multiplayer = True            
             menu_login()
+            controls = threading.Thread(target=self.get_controls) 
+            controls.start()           
             menu_online()
             camera = threading.Thread(target=self.capture_send_frame)
             #camera.daemon = True
-            camera.start()
+            camera.start()            
             self.new_game() 
         elif select == 3:
             run_menu()
@@ -34,8 +36,6 @@ class Game:
             self.exit()
        
     def new_game (self):
-        
-        
         while True:                             # laço externo do game over
             # Configurando o começo do jogo.
             self.asteroids = pygame.sprite.Group()  # lista com os asteroids   
@@ -52,6 +52,11 @@ class Game:
             self.level_counter=120              # countdown para mostrar novo level
             self.level = 0                      # fator para velocidade aumentar
             self.level_check = False            # veficia nova atualização da velocidade
+            
+            if settings.multiplayer:
+                settings.score2 = 0                         # pontuação
+                settings.life2 = 3                       # life
+                settings.ups2 = 1
             
             hi = sql_request()
             settings.hi_score = hi
@@ -77,13 +82,19 @@ class Game:
             if self.boss != None and self.boss.dead: self.__menu_win__()        
             else: self.__menu_last__()
             
+    def get_controls(self): 
+        self.socket_control = Socket_server_controls('localhost', 4039)
+        self.socket_control.receive_controls()
+            
     def capture_send_frame(self):
+        frame = pygame.display.get_surface() 
+        data_string = pygame.image.tostring(frame, "RGB")
+        self.socket = Socket_client('localhost', 4041, len(data_string))
         while True:
-            frame = pygame.display.get_surface() 
+            frame = pygame.display.get_surface()             
             #print(f'frame size: {frame.get_size()}')
-            self.socket = Socket_client('localhost', 4041)                
-            self.socket.send_frame_TCP(frame)
-     
+            #self.socket = Socket_client('localhost', 4041)                
+            self.socket.send_frame_TCP(frame)     
         
     def main_loop (self):
         ''' new game'''
@@ -115,12 +126,32 @@ class Game:
                 self.boss.move(self.player.col_rect.centerx)
                         
             #atualiza jogador   
-            self.player.update()
-            settings.running = self.check_collision()
+            if (settings.life > 0):
+                self.player.update()
+                life = [settings.life]     
+                score = [settings.score]    
+                ups = [settings.ups]
+                p1_alive = self.check_collision(self.player, life, score, ups)
+                settings.life = life[0]
+                settings.score = score[0]
+                settings.ups = ups[0] 
+            else: self.player.kill()
             
             #online
             if settings.multiplayer:
-                self.player2.update()                           
+                if (settings.life2 > 0):
+                    self.player2.update()
+                    life = [settings.life2]     
+                    score = [settings.score2]    
+                    ups = [settings.ups2]
+                    p2_alive = self.check_collision(self.player2, life, score, ups)
+                    settings.life2 = life[0]
+                    settings.score2 = score[0]
+                    settings.ups2 = ups[0]
+                else: self.player2.kill()
+                if (settings.life == 0) and (settings.life2 == 0): settings.running = False
+            else:
+                settings.running = p1_alive                          
             
             #derrotou o boss
             if self.boss != None and self.boss.dead \
@@ -131,7 +162,11 @@ class Game:
             # verifica fim de jogo com recorde
             if not settings.running and settings.score > settings.hi_score:
                 settings.hi_score = settings.score
-                sql_update(settings.hi_score)                 
+                sql_update(settings.hi_score)             
+            if settings.multiplayer:                
+                if not settings.running and settings.score2 > settings.hi_score:
+                    settings.hi_score = settings.score2
+                    sql_update(settings.hi_score)
                 
             # verifica nivel game
             self.check_level()
@@ -216,29 +251,29 @@ class Game:
         return True
     
     
-    def check_collision (self):        
+    def check_collision (self, player, life, score, ups):        
         # Checando se jogador ou algum rocket colidiu com algum rock.
         for rock in self.asteroids:
             jogadorColidiu = False
             #player colide asteroid
             if not rock.dead:
-                if self.player.col_rect.colliderect(rock.col_rect):
-                    offset = (rock.col_rect.x - self.player.col_rect.x, rock.col_rect.y - self.player.col_rect.y)
-                    jogadorColidiu = self.player.mask.overlap(rock.mask, offset)
+                if player.col_rect.colliderect(rock.col_rect):
+                    offset = (rock.col_rect.x - player.col_rect.x, rock.col_rect.y - player.col_rect.y)
+                    jogadorColidiu = player.mask.overlap(rock.mask, offset)
                 if jogadorColidiu: 
                     rock.dead = True
-                    return self.reduce_life()
+                    return self.reduce_life(life)
             #player destroy asteroid
-            for rocket in self.player.rockets:
+            for rocket in player.rockets:
                 if not rock.dead:
                     rocketColidiu = rocket.col_rect.colliderect(rock.col_rect)
                     if rocketColidiu:
                         rock.explode()                                   
-                        self.player.rockets.remove(rocket)
-                        settings.score = settings.score + 50
+                        player.rockets.remove(rocket)
+                        score[0] = score[0] + 50
             if rock.dead and rock.idx_ani >= len(rock.list_surf)-1 and rock.delay > rock.delay_ani-1:                   
                 r = random.randint(1,settings.luck)                        
-                if r == 1 and settings.life < 3:
+                if r == 1 and life[0] < 3:
                     shield = ShieldUP(rock.col_rect.center, (50,50))                               
                     self.shields.add(shield) 
         # Checando se jogador ou algum rocket colidiu com algum mob.
@@ -246,65 +281,65 @@ class Game:
             jogadorColidiu = False
             # check player colide enemy
             if not mob.dead:
-                if self.player.col_rect.colliderect(mob.col_rect):
-                    offset = (mob.col_rect.x - self.player.col_rect.x, mob.col_rect.y - self.player.col_rect.y)
-                    jogadorColidiu = self.player.mask.overlap(mob.mask, offset)
+                if player.col_rect.colliderect(mob.col_rect):
+                    offset = (mob.col_rect.x - player.col_rect.x, mob.col_rect.y - player.col_rect.y)
+                    jogadorColidiu = player.mask.overlap(mob.mask, offset)
                 if jogadorColidiu: 
                     mob.life -= 1
                     if mob.life == 0: 
                         mob.explode()
-                        settings.score = settings.score + 100 
+                        score[0] = score[0] + 100 
                     else: 
                         mob.sounds[0].play()                    
-                    return self.reduce_life()
+                    return self.reduce_life(life)
             # check player destroy enemy
-            for rocket in self.player.rockets:
+            for rocket in player.rockets:
                 if not mob.dead:
                     rocketColidiu = rocket.col_rect.colliderect(mob.col_rect)
                     if rocketColidiu:
                         mob.life -= 1
                         if mob.life == 0: 
                             mob.explode()
-                            settings.score = settings.score + 100 
+                            score[0] = score[0] + 100 
                         else: 
                             mob.sounds[0].play()                                                       
-                        self.player.rockets.remove(rocket)
+                        player.rockets.remove(rocket)
             #power up
             if mob.dead and mob.idx_ani >= len(mob.list_surf)-1 and mob.delay > mob.delay_ani-1:                   
                 r = random.randint(1,settings.luck)                        
-                if r == 1 and settings.ups < 5:
+                if r == 1 and ups[0] < 5:
                     pow = PowerUP(mob.col_rect.center, (50,50))                               
                     self.pows.add(pow)                    
             # enemy rockets hit player
             for fire in mob.rockets:
-                if self.player.col_rect.colliderect(fire.col_rect):
-                    offset = (fire.col_rect.x - self.player.col_rect.x, fire.col_rect.y - self.player.col_rect.y)
-                    jogadorColidiu = self.player.mask.overlap(fire.mask, offset)
+                if player.col_rect.colliderect(fire.col_rect):
+                    offset = (fire.col_rect.x - player.col_rect.x, fire.col_rect.y - player.col_rect.y)
+                    jogadorColidiu = player.mask.overlap(fire.mask, offset)
                 if jogadorColidiu: 
                     mob.rockets.remove(fire)
-                    return self.reduce_life() 
+                    return self.reduce_life(life) 
         # player get powerup
         for pow in self.pows:
             jogadorColidiu = False
             if not pow.dead:
-                if self.player.col_rect.colliderect(pow.col_rect):
-                    offset = (pow.col_rect.x - self.player.col_rect.x, pow.col_rect.y - self.player.col_rect.y)
-                    jogadorColidiu = self.player.mask.overlap(pow.mask, offset)
+                if player.col_rect.colliderect(pow.col_rect):
+                    offset = (pow.col_rect.x - player.col_rect.x, pow.col_rect.y - player.col_rect.y)
+                    jogadorColidiu = player.mask.overlap(pow.mask, offset)
                 if jogadorColidiu:
-                    if settings.ups < 5:
-                        settings.ups += 1                    
+                    if ups[0] < 5:
+                        ups[0] += 1                    
                         pow.get()
                     pow.kill() 
         # player get shield - life
         for shield in self.shields:
             jogadorColidiu = False
             if not shield.dead:
-                if self.player.col_rect.colliderect(shield.col_rect):
-                    offset = (shield.col_rect.x - self.player.col_rect.x, shield.col_rect.y - self.player.col_rect.y)
-                    jogadorColidiu = self.player.mask.overlap(shield.mask, offset)
+                if player.col_rect.colliderect(shield.col_rect):
+                    offset = (shield.col_rect.x - player.col_rect.x, shield.col_rect.y - player.col_rect.y)
+                    jogadorColidiu = player.mask.overlap(shield.mask, offset)
                 if jogadorColidiu:
-                    if settings.life < 3:
-                        settings.life += 1                    
+                    if life[0] < 3:
+                        life[0] += 1                    
                         shield.get()
                     shield.kill()    
         # check boss
@@ -312,45 +347,47 @@ class Game:
         if self.boss != None:
             # check player colide boss
             if not self.boss.dead:
-                if self.player.col_rect.colliderect(self.boss.col_rect):
-                    offset = (self.boss.col_rect.x - self.player.col_rect.x, self.boss.col_rect.y - self.player.col_rect.y)
-                    jogadorColidiu = self.player.mask.overlap(self.boss.mask, offset)
+                if player.col_rect.colliderect(self.boss.col_rect):
+                    offset = (self.boss.col_rect.x - player.col_rect.x, self.boss.col_rect.y - player.col_rect.y)
+                    jogadorColidiu = player.mask.overlap(self.boss.mask, offset)
                 if jogadorColidiu: 
                     self.boss.life -= 1
                     if self.boss.life == 0: 
                         self.boss.explode()
-                        settings.score = settings.score + 1000 
+                        score[0] = score[0] + 1000 
                     else: 
                         self.boss.sounds[0].play()
-                    return self.reduce_life()
+                    return self.reduce_life(life)
             # check player destroy boss
-            for rocket in self.player.rockets:
+            for rocket in player.rockets:
                 if not self.boss.dead:
                     rocketColidiu = rocket.col_rect.colliderect(self.boss.col_rect)
                     if rocketColidiu:
                         self.boss.life -= 1
                         if self.boss.life == 0: 
                             self.boss.explode()
-                            settings.score = settings.score + 1000 
+                            score[0] = score[0] + 1000 
                         else: 
                             self.boss.sounds[0].play()
-                        self.player.rockets.remove(rocket)                                              
+                        player.rockets.remove(rocket)                                              
             # enemy rockets hit player
             for fire in self.boss.rockets:
-                if self.player.col_rect.colliderect(fire.col_rect):
-                    offset = (fire.col_rect.x - self.player.col_rect.x, fire.col_rect.y - self.player.col_rect.y)
-                    jogadorColidiu = self.player.mask.overlap(fire.mask, offset)
+                if player.col_rect.colliderect(fire.col_rect):
+                    offset = (fire.col_rect.x - player.col_rect.x, fire.col_rect.y - player.col_rect.y)
+                    jogadorColidiu = player.mask.overlap(fire.mask, offset)
                 if jogadorColidiu: 
                     self.boss.rockets.remove(fire)
-                    return self.reduce_life()                    
+                    return self.reduce_life(life)                    
         return True
     
-    def reduce_life(self):
+    
+    def reduce_life(self, life):
         settings.sound_player['ship'][0].play()
-        if settings.life > 1:
-            if not eval(settings.hack['god']): settings.life -= 1
+        if life[0] > 1:
+            if not eval(settings.hack['god']): life[0] -= 1
             return True
-        else:                    
+        else:
+            if life[0] == 1: life[0] -= 1          
             return False
             
         
@@ -436,6 +473,8 @@ class Game:
             rectTexto.center = (x, y)
         elif position == 'topLeft':
             rectTexto.topleft = (x, y)
+        elif position == 'topRight':
+            rectTexto.topright = (x, y)
         settings.window.blit(objTexto, rectTexto)
 
 
@@ -486,6 +525,39 @@ class Game:
         offset = 40
         self.print_text('POWER UP', 10, settings.disp_size[1]-offset, 'topLeft')
         settings.window.blit(settings.surf_player['ups'][settings.ups-1], (200,settings.disp_size[1]-offset))
+        
+        #player 2
+        if settings.multiplayer: 
+             # Colocando as pontuações.
+            self.print_text(settings.name, settings.disp_size[0]-10, 0, 'topRight')
+            self.print_text('' + str(settings.score2), settings.disp_size[0]-10, 40, 'topRight')
+                        
+            #desenhando a vida da nave
+            offset = 120
+            x = settings.disp_size[0]
+            y = settings.disp_size[1]-offset
+            #self.print_text('SHIELD', 10, settings.disp_size[1]-(offset-30), 'topLeft')
+            if settings.life2 == 3:
+                settings.window.blit(settings.surf_player['life'][0], (x-70,y))
+                settings.window.blit(settings.surf_player['life'][0], (x-140,y))
+                settings.window.blit(settings.surf_player['life'][0], (x-210,y))
+            elif settings.life2 == 2:
+                settings.window.blit(settings.surf_player['life'][0], (x-70,y))
+                settings.window.blit(settings.surf_player['life'][0], (x-140,y))
+                settings.window.blit(settings.surf_player['life'][1], (x-210,y))
+            elif settings.life2 == 1:
+                settings.window.blit(settings.surf_player['life'][0], (x-70,y))
+                settings.window.blit(settings.surf_player['life'][1], (x-140,y))
+                settings.window.blit(settings.surf_player['life'][1], (x-210,y))
+            else: 
+                settings.window.blit(settings.surf_player['life'][1], (x-70,y))
+                settings.window.blit(settings.surf_player['life'][1], (x-140,y))
+                settings.window.blit(settings.surf_player['life'][1], (x-210,y))
+            
+            #desenhando os power ups
+            offset = 40
+            #self.print_text('POWER UP', 10, settings.disp_size[1]-offset, 'topLeft')
+            settings.window.blit(settings.surf_player['ups'][settings.ups2-1], (x-160,settings.disp_size[1]-offset))
     
     
     def __wait_input__(self):
@@ -528,6 +600,9 @@ class Game:
         self.mobs.empty()
         self.boss = None
         self.player.kill()
+        
+        if settings.multiplayer:
+            self.player2.kill()
         
         self.draw_background()
         
