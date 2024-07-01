@@ -4,14 +4,16 @@ from .Settings import settings
 import pygame
 from .SQL import *
 from .Socket import *
-import threading
 
 def set_tab1(w,h,tab):  
     frame = CTkFrame(master=tab, width=w, height=h, fg_color='#333333', corner_radius=3, border_width=2)
     frame.place(relx=0.5, rely=0.6, anchor='center')
+    #frame.pack(padx=20, pady=20)
     
-    l1 = CTkLabel(master=frame, text='OPTIONS',font=('Arial',40),text_color='#111111')
-    l1.place(relx=0.5, rely=0.1, anchor='center')
+    l1 = CTkLabel(master=frame, text='OPTIONS',font=('Arial',30),text_color='#111111')
+    #l1.grid()
+    l1.place(relx=0.5, rely=0.25, anchor='center')
+    #l1.pack(pady=20)
     
     set_start_exit(frame)
     
@@ -28,21 +30,36 @@ def set_tab3(w,h,tab):
     frame.place(relx=0.5, rely=0.6, anchor='center')
                   
     l1 = CTkLabel(master=frame, text='Resolution',font=('Arial',20),text_color='#111111')
-    l1.place(relx=0.4, rely=0.2, anchor='center')
+    l1.place(relx=0.35, rely=0.25, anchor='center')
+    #l1.grid(column=0, columnspan=5)
     
-    def set_resolution(value:str):         
+    def set_resolution(value:str):                      
         res = value.split('x')
-        settings.menu.geometry(f'{res[0]}x{res[1]}')
-        
+                
         settings.disp_size = (int(res[0]),int(res[1]))       
         settings.window = pygame.display.set_mode((int(res[0]),int(res[1])))
-        if settings.fullscreen: pygame.display.toggle_fullscreen()       
-
-    list = ['1920x1080','1600x1024','1366x768','1280x720','1024x768']
+               
+        s0 = settings.disp_size[0]
+        s1 = settings.disp_size[1]
+        w = int(settings.disp_size[0]/2)
+        h = int(settings.disp_size[1]/2)
+                
+        settings.menu.overrideredirect(True)
+        center_window(settings.menu, s0, s1, w, h)
+                
+        #if settings.fullscreen: 
+            #pygame.display.toggle_fullscreen() 
+            #settings.menu.attributes("-fullscreen", "True")
+            #settings.menu.state('zoomed')
+                  
+    list = ['1920x1080','1600x1024','1366x768','1280x720','1024x768']     
+    #print(pygame.display.list_modes())
     cbox1 = CTkComboBox(master=frame, values=list, corner_radius=30, 
                 border_width=2, command=set_resolution)
-    cbox1.place(relx=0.5, rely=0.2, anchor='center')
-    
+    cbox1.place(relx=0.5, rely=0.25, anchor='center')
+    cbox1.set(f'{settings.disp_size[0]}x{settings.disp_size[1]}')  
+    #cbox1.grid(column=6)
+      
     set_start_exit(frame)
 
 
@@ -69,7 +86,7 @@ def set_tab5(w,h,tab):
     chbox1 = CTkCheckBox(master=frame, text='EasyMode', corner_radius=30, 
                 fg_color='#111111', checkbox_height=25, checkbox_width=25,
                 onvalue='True', offvalue='False', variable=cvar, command=set_easy)
-    chbox1.place(relx=0.3, rely=0.7, anchor='center')
+    chbox1.place(relx=0.35, rely=0.65, anchor='center')
         
     def set_god():
         if gvar.get() == 1: settings.hack['god'] = 'True'
@@ -79,7 +96,7 @@ def set_tab5(w,h,tab):
     sw1 = CTkSwitch(master=frame, text='GodMode',
                     onvalue=1, offvalue=0, variable=gvar,
                     command=set_god)
-    sw1.place(relx=0.7, rely=0.7, anchor='center')
+    sw1.place(relx=0.65, rely=0.65, anchor='center')
     
     set_start_exit(frame)
 
@@ -92,6 +109,8 @@ def set_start_exit(frame):
         lab2 = 'START GAME'
     
     l2 = CTkLabel(master=frame, text=lab1,font=('Arial',30),text_color='#111111')
+    #l2.grid()
+    #l2.pack(pady=20)
     l2.place(relx=0.5, rely=0.1, anchor='center')
     
     def back_bt():        
@@ -101,7 +120,9 @@ def set_start_exit(frame):
     #img = Image.open('images/ship.png')
     b1 = CTkButton(master=frame, text=lab2, corner_radius=30, fg_color='transparent',
                 border_width=2, command=back_bt)
-    b1.place(relx=0.5, rely=0.7, anchor='center')
+    #b1.grid()
+    #b1.pack(pady=20)
+    b1.place(relx=0.5, rely=0.6, anchor='center')
     
     def exit_bt():
         #if settings.multiplayer and settings.server:
@@ -111,7 +132,9 @@ def set_start_exit(frame):
         
     b2 = CTkButton(master=frame, text='EXIT GAME', corner_radius=30, fg_color='transparent',
                 border_width=2, command=exit_bt)
-    b2.place(relx=0.5, rely=0.8, anchor='center')
+    #b2.pack(pady=20)
+    b2.place(relx=0.5, rely=0.67, anchor='center')    
+    #b2.grid()
  
 def login_entry(w,h):
     frame = CTkFrame(master=settings.menu, width=w, height=h, fg_color='#333333', corner_radius=3, border_width=2)
@@ -171,7 +194,7 @@ def login_entry(w,h):
 
 def online_entry(w,h):
     frame = CTkFrame(master=settings.menu, width=w, height=h, fg_color='#333333', corner_radius=3, border_width=2)
-    frame.place(relx=0.5, rely=0.6, anchor='center')
+    frame.place(relx=0.5, rely=0.5, anchor='center')
                   
     l1 = CTkLabel(master=frame, text='MULTIPLAYER GAME',font=('Arial',25),text_color='#111111')
     l1.place(relx=0.5, rely=0.2, anchor='center')
@@ -187,7 +210,7 @@ def online_entry(w,h):
     entry2.insert(0,4040)
         
     def join_bt():
-        server_conn_BUFF = Socket_server('0.0.0.0', settings.port2)        
+        '''server_conn_BUFF = Socket_server('0.0.0.0', settings.port2)        
         server_BUFF = threading.Thread(target=server_conn_BUFF.receive_buffer_size)
         #settings.server.daemon = True
         server_BUFF.start()  
@@ -196,14 +219,14 @@ def online_entry(w,h):
         settings.server = threading.Thread(target=server_conn.receive_frame_TCP)
         #settings.server.daemon = True
         settings.server.start()
-        
+        '''
         settings.host = str(entry1.get())
         settings.port = int(entry2.get())
         client_conn = Socket_client(settings.host, settings.port)
         client_conn.send('hi') 
         
-        while not settings.TCP_buffer:
-            pass
+        #while not settings.TCP_buffer:
+        #    pass
         
         settings.menu.destroy()
         settings.menu.quit()      
@@ -230,10 +253,11 @@ def menu_online():
     settings.menu = CTk()
     set_appearance_mode('dark')
     set_default_color_theme('blue')
+    settings.menu.overrideredirect(True)
     w = int(settings.disp_size[0]/2)
     h = int(settings.disp_size[1]/2)
-    x = settings.disp_size[0]
-    y = settings.disp_size[1]
+    x = settings.disp_size[0]+100
+    y = settings.disp_size[1]+100
     s = f'{w}x{h}+{x}+{y}'
     settings.menu.geometry(s)
     
@@ -250,10 +274,11 @@ def menu_login():
     settings.menu = CTk()     
     set_appearance_mode('dark')
     set_default_color_theme('blue')
+    settings.menu.overrideredirect(True)
     w = int(settings.disp_size[0]/2)
     h = int(settings.disp_size[1]/2)
-    x = settings.disp_size[0]
-    y = settings.disp_size[1]
+    x = settings.disp_size[0] +100
+    y = settings.disp_size[1] +100  
     s = f'{w}x{h}+{x}+{y}'
     settings.menu.geometry(s)
     
@@ -265,16 +290,30 @@ def menu_login():
     
     settings.menu.mainloop()
 
+def center_window(root, screen_width, screen_height, width=300, height=200):
+    # calculate position x and y coordinates
+    x = (screen_width/2) + (width/2)
+    y = (screen_height/2) + (height/2) -50
+    root.geometry('%dx%d+%d+%d' % (width, height, x, y))
+
 def run_menu():
     settings.menu = CTk() 
     set_appearance_mode('dark')
     set_default_color_theme('blue')
-    w = settings.disp_size[0]
-    h = settings.disp_size[1]
+    settings.menu.attributes('-alpha', 0.9) 
+    settings.menu.attributes("-topmost", True)
+    #settings.menu.grab_current()
         
-    if settings.fullscreen:
-        settings.menu.attributes("-fullscreen", "True")
-        settings.menu.state('zoomed')
+    s0 = settings.disp_size[0]
+    s1 = settings.disp_size[1]
+    w = int(settings.disp_size[0])
+    h = int(settings.disp_size[1])
+            
+    settings.menu.overrideredirect(True)
+    center_window(settings.menu, s0, s1, w, h)
+    #if settings.fullscreen:
+        #settings.menu.attributes("-fullscreen", "True")
+        #settings.menu.state('zoomed')
 
     t_view = CTkTabview(master=settings.menu, width=w, height=h)
     t_view.pack(padx=50,pady=50)

@@ -1,7 +1,7 @@
 import socket 
 from .Settings import settings
 import pygame
-
+'''
 class Socket_server:
     def __init__(self, host, port):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # TCP 
@@ -23,9 +23,9 @@ class Socket_server:
     def receive_frame_TCP(self): 
         self.socket.bind((self.host, self.port))
         self.socket.listen(1)  #TCP
-        print('Server up! TCP frame')   
+        #print('Server up! TCP frame')   
         self.conn, addr = self.socket.accept()     #TCP
-        print(f'received connection from {addr}')
+        #print(f'received connection from {addr}')
         settings.open_connection2 = True    
         
         with self.conn:           
@@ -46,7 +46,7 @@ class Socket_server:
                         dataset = bytes().join(received)
                         settings.frame = pygame.image.fromstring(dataset,settings.disp_size,"RGB")                               
                         settings.frame_list.append(settings.frame)
-                    
+'''                    
                                                   
     
 class Socket_client():
@@ -56,13 +56,13 @@ class Socket_client():
         self.port = port
     
     def send(self, message):    
-        print(f'sending to {self.host}:{self.port}')
+        #print(f'sending to {self.host}:{self.port}')
         self.socket.connect((self.host, self.port))
         with self.socket: 
             data_string = message.encode()
             self.socket.send(data_string)
      
-     
+'''     
 class Socket_client_controls():
     def __init__(self, host, port):
         self.socket = socket.socket()    
@@ -73,3 +73,31 @@ class Socket_client_controls():
     def send(self, message):  
         data_string = message.encode()
         self.socket.send(data_string)
+'''        
+        
+class Socket_client_message():
+    def __init__(self, host, port):
+        self.socket = socket.socket()
+        self.socket.connect((host, port))
+                   
+    def send_message(self, message):    
+       data_string = message.encode()
+       self.socket.send(data_string)
+       
+
+class Socket_server_message:
+    def __init__(self, host, port):
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
+        self.socket.bind((host, port))
+        self.socket.listen(1)
+        print('Server up!')   
+        self.conn, addr = self.socket.accept()
+        settings.open_connection = True 
+    
+    def receive_messages(self):
+        with self.conn: 
+            while settings.open_connection: 
+                data = self.conn.recv(64)
+                message = data.decode()  
+                if len(settings.buffer_message) < settings.max_buffer:
+                    settings.buffer_message.append(message) 

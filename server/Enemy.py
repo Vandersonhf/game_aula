@@ -3,12 +3,13 @@ import pygame
 from .Settings import settings
 
 class Asteroid(Sprite):    
-    def __init__(self, pos, size, speed):                       
+    def __init__(self, ID, pos, size, speed):                       
         super().__init__(size, pos, settings.surf_enemy['asteroid'], settings.sound_enemy['asteroid'])
         
         # valor por objeto
         self.speed = speed
-        self.delay_ani = 1       
+        self.delay_ani = 1   
+        self.ID = ID    
         
     # definindo a função mover
     def move(self):
@@ -40,7 +41,7 @@ class Asteroid(Sprite):
         
 
 class Mob(Sprite):    
-    def __init__(self, pos, size, speed, mob_surf, mob_fire_delay, type):
+    def __init__(self, ID, pos, size, speed, mob_surf, mob_fire_delay, type):
         '''pos, size and speed = tuple[int,int]'''        
         super().__init__(size, pos, settings.surf_enemy[mob_surf], settings.sound_enemy['enemy1'])
         
@@ -50,6 +51,7 @@ class Mob(Sprite):
         self.maxlife = 2
         self.life = self.maxlife
         self.type = type 
+        self.ID = ID
         
         self.delay_fire = mob_fire_delay
         self.counter = 0
@@ -58,7 +60,7 @@ class Mob(Sprite):
         self.done = False
                
     # definindo a função mover
-    def move(self, player_pos):
+    def move_chase(self, player_pos):
         if not self.dead:
             if self.type > 3: 
                 if self.col_rect.centerx < player_pos:
@@ -67,10 +69,17 @@ class Mob(Sprite):
             else: self.col_rect.x += self.speed[0] 
             #if self.col_rect.y<settings.disp_size[1]/2:
             self.col_rect.y += self.speed[1] 
+    
+    def move(self):
+        if not self.dead:
+            self.col_rect.x += self.speed[0]             
+            self.col_rect.y += self.speed[1] 
             
     def update(self):        
         self.counter += 1
-        if not self.dead: self.new_fire()
+        if not self.dead: 
+            self.new_fire()
+            self.move()
         
         if self.dead:
             self.done = self.animation(-1)            
@@ -128,17 +137,24 @@ class Boss(Sprite):
         self.done = False
                
     # definindo a função mover
-    def move(self, player_pos):
+    def move_chase(self, player_pos):
         if not self.dead:
             if self.col_rect.centerx < player_pos:
                 self.col_rect.x += 3
             else: self.col_rect.x += -3            
             if self.col_rect.y<settings.disp_size[1]/3:
                 self.col_rect.y += self.speed[1] 
+                
+    def move(self):
+        if not self.dead:
+            self.col_rect.x += self.speed[0]             
+            self.col_rect.y += self.speed[1]
             
     def update(self):        
         self.counter += 1
-        if not self.dead: self.new_fire()
+        if not self.dead: 
+            self.new_fire()
+            self.move()
         
         if self.dead:
             self.done = self.animation(-1)            
@@ -206,7 +222,7 @@ class Rocket(Sprite):
         if base_rocket > settings.disp_size[1]:
             self.kill() 
            
-            
+'''            
 class PowerUP(Sprite):    
     def __init__(self, pos, size):         
         super().__init__(size, pos, settings.surf_enemy['pows'], settings.sound_enemy['pows'])
@@ -237,4 +253,4 @@ class ShieldUP(Sprite):
         self.time -= 1 
         if self.time > 0: self.draw(settings)
         else: self.kill()
-        
+ '''       

@@ -50,18 +50,21 @@ class Settings:
         self.port = 4040
         self.open_connection = False
         self.buffer_controls = []
+        self.buffer_message = []
         self.last_message = None
-        self.max_buffer = 10
-        self.last_obj = None        
+        self.max_buffer = 30
+        self.last_obj = None   
+        self.client = '192.168.0.107'     
+        self.ID = 1
         
         # game globals
-        self.score: int = 0
-        self.score2: int = 0
+        #self.score: int = 0
+        #self.score2: int = 0
         self.hi_score: int = 0
-        self.life = 3
-        self.life2 = 3
-        self.ups = 1
-        self.ups2 = 1
+        #self.life = 3
+        #self.life2 = 3
+        #self.ups = 1
+        #self.ups2 = 1
         self.running: bool = False
         self.level_points = 2000
         self.time = 0
@@ -199,7 +202,7 @@ class Settings:
                             'life':surf_lifes, 'ups':surf_ups, 'extra':surf_extra}        
         self.surf_enemy = {'asteroid':surf_asteroids, 'enemy1':surf_enemy1, 'rocket1':surf_fire,
                            'enemy2':surf_enemy2, 'enemy3':surf_enemy3, 'enemy4':surf_enemy4,
-                           'sub_boss':surf_sub_boss, 'boss': surf_boss, 'pows':surf_pows,
+                           'subboss':surf_sub_boss, 'boss': surf_boss, 'pows':surf_pows,
                            'shield':surf_shield}
             
     

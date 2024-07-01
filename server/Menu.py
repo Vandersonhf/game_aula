@@ -1,11 +1,9 @@
 from customtkinter import *
-from PIL import Image
 from .Settings import settings
 import pygame
 from .SQL import *
 from .Socket import *
 import threading
-import tkinter
 
 def set_tab1(w,h,tab):  
     frame = CTkFrame(master=tab, width=w, height=h, fg_color='#333333', corner_radius=3, border_width=2)
@@ -206,22 +204,20 @@ def online_entry(w,h):
             pass
         
         print('Connected with client')
-        settings.last_message = None
+        #settings.last_message = None
         settings.menu.destroy()
         settings.menu.quit()
     
     def create_bt():
         server_conn = Socket_server('0.0.0.0', settings.port)        
-        settings.server = threading.Thread(target=server_conn.receive)
-        settings.server.daemon = True
-        settings.server.start()
+        threading.Thread(target=server_conn.receive).start() 
         
         l1 = CTkLabel(master=frame, text='WAITING PLAYER 2...',font=('Arial',20),text_color='#111111')
         l1.place(relx=0.5, rely=0.45, anchor='center')
         
         # check hi signal
-        connect = threading.Thread(target=check_hi)            
-        connect.start()
+        threading.Thread(target=check_hi).start()            
+        
     
     b2 = CTkButton(master=frame, text='CREATE GAME', corner_radius=30, fg_color='transparent',
                 border_width=2, command=create_bt)
@@ -245,6 +241,7 @@ def menu_online():
     settings.menu = CTk()     
     set_appearance_mode('dark')
     set_default_color_theme('blue')
+    settings.menu.overrideredirect(True)
     w = int(settings.disp_size[0]/2)
     h = int(settings.disp_size[1]/2)
     x = int(w/2)
@@ -265,6 +262,7 @@ def menu_login():
     settings.menu = CTk()     
     set_appearance_mode('dark')
     set_default_color_theme('blue')
+    settings.menu.overrideredirect(True)
     w = int(settings.disp_size[0]/2)
     h = int(settings.disp_size[1]/2)
     x = int(w/2)
@@ -296,8 +294,8 @@ def run_menu():
         
     s0 = settings.disp_size[0]
     s1 = settings.disp_size[1]
-    w = int(settings.disp_size[0]/2)
-    h = int(settings.disp_size[1]/2)
+    w = int(settings.disp_size[0])
+    h = int(settings.disp_size[1])
             
     settings.menu.overrideredirect(True)
     center_window(settings.menu, s0, s1, w, h)
@@ -308,7 +306,7 @@ def run_menu():
     t_view = CTkTabview(master=settings.menu, width=w, height=h)
     t_view.pack(padx=20,pady=20)   
     
-    print(settings.disp_size) 
+    #print(settings.disp_size) 
 
     t_view.add('General')
     t_view.add('Control')
@@ -322,8 +320,7 @@ def run_menu():
     set_tab4(w,h,t_view.tab('Sounds'))
     set_tab5(w,h,t_view.tab('Hacks'))
 
-    settings.menu.mainloop()
-    
+    settings.menu.mainloop()    
     return 0
    
     

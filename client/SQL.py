@@ -33,10 +33,10 @@ def run_query(hosts, port, db_query, user, pwd):
     
 #if __name__ == '__main__':   
 def sql_request():
-    hosts = ['localhost']
+    #hosts = ['localhost']
     port = 3306
     db_query = f"use game;select hi_score from score where nome = '{settings.name}';"
-    res_list = run_query(hosts, port, db_query, 'user_game', '123')
+    res_list = run_query(settings.hosts, port, db_query, 'user_game', '123')
     #print("RESULT ALL")
     res = ''
     for row in res_list:
@@ -48,16 +48,16 @@ def sql_request():
     return res[0][0]
     
 def sql_update(hiscore):
-    hosts = ['localhost']
+    #hosts = ['localhost']
     port = 3306
     db_query = f"use game;update score set hi_score = {hiscore} where nome = '{settings.name}';"
-    res_list = run_query(hosts, port, db_query, 'user_game', '123')
+    res_list = run_query(settings.hosts, port, db_query, 'user_game', '123')
     
 def sql_name():
-    hosts = ['localhost']
+    #hosts = ['localhost']
     port = 3306
     db_query = f"use game;select nome from score where nome = '{settings.name}';"
-    res_list = run_query(hosts, port, db_query, 'user_game', '123')
+    res_list = run_query(settings.hosts, port, db_query, 'user_game', '123')
     
     res = ''
     for row in res_list:        
@@ -67,10 +67,10 @@ def sql_name():
     return res[0][0]
 
 def sql_login():
-    hosts = ['localhost']
+    #hosts = ['localhost']
     port = 3306    
     db_query = f"use game;select nome from score where nome = '{settings.name}' and pass = '{settings.pwd}';"
-    res_list = run_query(hosts, port, db_query, 'user_game', '123')
+    res_list = run_query(settings.hosts, port, db_query, 'user_game', '123')
     
     res = ''
     for row in res_list:        
@@ -82,7 +82,7 @@ def sql_login():
     else: return 0
     
 def sql_register():
-    hosts = ['localhost']
+    #hosts = ['localhost']
     port = 3306
     db_query = f"use game;INSERT INTO score VALUES ('0', '{settings.name}', '{settings.pwd}');"
-    res_list = run_query(hosts, port, db_query, 'user_game', '123')
+    res_list = run_query(settings.hosts, port, db_query, 'user_game', '123')
