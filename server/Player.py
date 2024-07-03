@@ -253,7 +253,7 @@ class Player(Sprite):
                             if self.type == 2: message = 'up_player2_'+str(self.ups)+'_'+str(pow.ID)+'_'
                             while len(message) < 64: message += '0'
                             self.socket.send_message(message)
-                    pow.kill() 
+                        pow.kill() 
         # player get shield - life
         for shield in shields:
             jogadorColidiu = False
@@ -270,7 +270,7 @@ class Player(Sprite):
                             if self.type == 2: message = 'life_player2_'+str(self.life)+'_'+str(shield.ID)+'_'
                             while len(message) < 64: message += '0'
                             self.socket.send_message(message)
-                    shield.kill()    
+                        shield.kill()    
         # check boss
         jogadorColidiu = False
         if boss != None:

@@ -187,7 +187,9 @@ class Game:
                 if (commands[1] == 'player2'): self.player.ups = ups                    
                 elif (commands[1] == 'player1'): self.player2.ups = ups  
                 ID = int(commands[3])
-                for pow in self.pows:                           
+                #print(f'POW ID {commands}')
+                for pow in self.pows:   
+                    #print(f'POW ID {pow.ID} and {ID}')                        
                     if pow.ID == ID: pow.kill()                     
             elif (commands[0] == 'life'):
                 life = int(commands[2])

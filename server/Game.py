@@ -100,7 +100,7 @@ class Game:
             self.shields.update()
             if self.boss != None:
                 self.boss.update()
-                self.boss.move(self.player.col_rect.centerx)
+                self.boss.move_chase(self.player.col_rect.centerx)
                         
             #atualiza jogador   
             if (self.player.life > 0):
