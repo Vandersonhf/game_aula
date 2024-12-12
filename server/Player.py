@@ -124,8 +124,8 @@ class Player(Sprite):
                     rock.explode()
                     self.score = self.score + 50
                     if self.socket and settings.multiplayer:
-                        if self.type == 1: message = message = 'dead_rock_score_player1_50_'+str(rock.ID)+'_' 
-                        if self.type == 2: message = message = 'dead_rock_score_player2_50_'+str(rock.ID)+'_'                       
+                        if self.type == 1: message = 'dead_rock_score_player1_50_'+str(rock.ID)+'_' 
+                        if self.type == 2: message = 'dead_rock_score_player2_50_'+str(rock.ID)+'_'                       
                         while len(message) < 64: message += '0'
                         self.socket.send_message(message)
                     return self.reduce_life()

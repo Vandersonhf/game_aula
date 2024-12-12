@@ -1,9 +1,10 @@
 from .Player import Player, Rocket, ShieldUP, PowerUP
 from .Enemy import Asteroid, Mob, Boss
 from .Settings import settings
-from .Menu import *
-from .SQL import *
-from .Socket import *
+#from .Menu import *
+from .Menu import Basic_menu
+#from .SQL import *
+from .Socket_client import *
 import pygame
 import random
 import threading
@@ -17,26 +18,34 @@ class Game:
         select = menu.run()
         
         if select == 1:            
-            menu_login()
+            #menu_login()
             self.new_game()
         elif select == 2: 
             settings.multiplayer = True            
-            menu_login()
-            threading.Thread(target=self.get_message).start() 
-            menu_online()
-            self.client_message = Socket_client_message(settings.client, 4031)  
-            self.new_game_P2()                           
+            #menu_login()            
+            #menu_online()            
+            with open("client/host.txt", "r") as arq:
+                ip = arq.read() 
+            settings.client_socket = AppClient(ip,  5041) 
+            settings.client_socket.connect_server()             
+            self.client_message = settings.client_socket
+            if self.client_message.conn:
+                threading.Thread(target=self.client_thread).start()
+                self.new_game_P2()   
+            else: self.run()                       
         elif select == 3:
-            run_menu()
-            if not settings.running:
-               self.new_game() 
+            #run_menu()
+            #if not settings.running:
+            #   self.new_game() 
+            pass
         elif select == 4:
             self.exit()
     
-    def get_message(self):         
-        self.server_message = Socket_server_message('0.0.0.0', 4032)
-        self.server_message.receive_messages()
     
+    def client_thread(self):
+        settings.client_socket.receive_messages()
+    
+        
     def new_game_P2 (self):
         while True:                             # laço externo do game over
             # Configurando o começo do jogo.
@@ -50,10 +59,15 @@ class Game:
             self.counter2 = 0                    # contador de iterações
             self.level_counter=120              # countdown para mostrar novo level
             self.level = 0                      # fator para velocidade aumentar
-            self.level_check = False            # veficia nova atualização da velocidade
+            self.level_check = False            # verifica nova atualização da velocidade
                        
-            settings.hi_score = sql_request()
-            settings.name = str(sql_name().upper())
+            #settings.hi_score = sql_request()
+            #settings.name = str(sql_name().upper())
+            with open("hi_score.txt", "r") as arq:
+                score = int(arq.read())
+            settings.hi_score = score
+            settings.name = 'PLAYER 2'
+            settings.name2 = 'PLAYER 1'
                    
             pygame.mixer.music.play(-1, 0.0)    # colocando a música de fundo
             
@@ -122,11 +136,15 @@ class Game:
             # verifica fim de jogo com recorde
             if not settings.running and self.player.score > settings.hi_score:
                 settings.hi_score = self.player.score
-                sql_update(settings.hi_score)             
+                #sql_update(settings.hi_score)       
+                with open("hi_score.txt", "w") as arq:                        
+                    arq.write(str(settings.hi_score))      
             if settings.multiplayer:                
                 if not settings.running and self.player2.score > settings.hi_score:
                     settings.hi_score = self.player2.score
-                    sql_update(settings.hi_score)            
+                    #sql_update(settings.hi_score)      
+                    with open("hi_score.txt", "w") as arq:                        
+                        arq.write(str(settings.hi_score))      
             
             # verifica nivel game
             self.check_level()
@@ -373,13 +391,16 @@ class Game:
             settings.ups = 1                      #power shots
             self.counter = 0                    # contador de iterações
             self.counter2 = 0                    # contador de iterações
-            self.level_counter=120              # countdown para mostrar novo level
+            self.level_counter = 120              # countdown para mostrar novo level
             self.level = 0                      # fator para velocidade aumentar
-            self.level_check = False            # veficia nova atualização da velocidade
+            self.level_check = False            # verifica nova atualização da velocidade
             
-            hi = sql_request()
-            settings.hi_score = hi
-            settings.name = str(sql_name().upper())
+            #hi = sql_request()
+            with open("hi_score.txt", "r") as arq:
+                score = int(arq.read())
+            settings.hi_score = score
+            #settings.name = str(sql_name().upper())
+            settings.name = 'PLAYER 1'
                    
             pygame.mixer.music.play(-1, 0.0)    # colocando a música de fundo
             
@@ -394,7 +415,14 @@ class Game:
             self.main_loop()        # inicia novo jogo
                                     
             # if game over close online connection
-            if settings.multiplayer: settings.open_connection = False                        
+            if settings.multiplayer: settings.open_connection = False   
+            
+            # verifica fim de jogo com recorde
+            if self.player.score > settings.hi_score:
+                settings.hi_score = self.player.score
+                #sql_update(settings.hi_score)        
+                with open("hi_score.txt", "w") as arq:                        
+                    arq.write(str(settings.hi_score))                      
             
             # Parando o jogo e mostrando a tela final.
             if self.boss != None and self.boss.dead: self.__menu_win__()        
@@ -443,12 +471,7 @@ class Game:
                     and self.boss.idx_ani >= len(self.boss.list_surf)-1 \
                     and self.boss.delay > self.boss.delay_ani-1:
                 settings.running = False
-            
-            # verifica fim de jogo com recorde
-            if not settings.running and settings.score > settings.hi_score:
-                settings.hi_score = settings.score
-                sql_update(settings.hi_score)                 
-                
+                              
             # verifica aumento de velocidade
             #if (self.level==0 or settings.score > self.level * settings.level_points) \
             if (self.level==0 or settings.time > settings.time_level)\
@@ -490,8 +513,8 @@ class Game:
                 self.exit()  
             if evento.type == pygame.KEYDOWN:
                 if evento.key == pygame.K_ESCAPE:
-                    run_menu()
-                    #self.exit()   
+                    #run_menu()
+                    self.exit()   
                 if evento.key == pygame.K_LEFT or evento.key == pygame.K_a:                    
                     self.player.teclas['esquerda'] = True
                 if evento.key == pygame.K_RIGHT or evento.key == pygame.K_d:
@@ -618,7 +641,7 @@ class Game:
         # Colocando as pontuações.
         self.print_text(settings.name, 10, 0, 'topLeft')
         self.print_text('' + str(self.player.score), 10, 40, 'topLeft')
-        self.print_text('HI SCORE: ' + str(settings.hi_score) +' '+ settings.name,
+        self.print_text('HI SCORE: ' + str(settings.hi_score),
                         settings.disp_size[0]/2, 20, 'center')
         if self.level == 0: lv=str(self.level+1)
         else: lv= str(self.level)
@@ -654,7 +677,7 @@ class Game:
         #player 2
         if settings.multiplayer: 
              # Colocando as pontuações.
-            self.print_text(settings.name, settings.disp_size[0]-10, 0, 'topRight')
+            self.print_text(settings.name2, settings.disp_size[0]-10, 0, 'topRight')
             self.print_text('' + str(self.player2.score), settings.disp_size[0]-10, 40, 'topRight')
                         
             #desenhando a vida da nave

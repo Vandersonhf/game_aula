@@ -54,8 +54,9 @@ class Settings:
         self.last_message = None
         self.max_buffer = 30
         self.last_obj = None   
-        self.client = '192.168.0.107'     
+        #self.client = '192.168.0.109'     
         self.ID = 1
+        self.server_socket = None
         
         # game globals
         #self.score: int = 0
@@ -71,6 +72,7 @@ class Settings:
         self.time_level = 2_000
         self.luck = 10
         self.name = ''
+        self.name2 = ''
         self.pwd = ''
 
         # moving background

@@ -2,7 +2,7 @@ from customtkinter import *
 from .Settings import settings
 import pygame
 from .SQL import *
-from .Socket import *
+#from .Socket import *
 import threading
 
 def set_tab1(w,h,tab):  
@@ -209,8 +209,8 @@ def online_entry(w,h):
         settings.menu.quit()
     
     def create_bt():
-        server_conn = Socket_server('0.0.0.0', settings.port)        
-        threading.Thread(target=server_conn.receive).start() 
+        '''server_conn = Socket_server('0.0.0.0', settings.port)        
+        threading.Thread(target=server_conn.receive).start()''' 
         
         l1 = CTkLabel(master=frame, text='WAITING PLAYER 2...',font=('Arial',20),text_color='#111111')
         l1.place(relx=0.5, rely=0.45, anchor='center')
@@ -320,6 +320,15 @@ def run_menu():
     set_tab4(w,h,t_view.tab('Sounds'))
     set_tab5(w,h,t_view.tab('Hacks'))
 
+    settings.menu.mainloop()    
+    return 0
+
+def run_menu0():
+    settings.menu = CTk() 
+        
+    settings.menu.title("Main Window")
+    settings.menu.geometry("640x480+100+100")    
+    
     settings.menu.mainloop()    
     return 0
    

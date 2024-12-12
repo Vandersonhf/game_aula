@@ -221,36 +221,4 @@ class Rocket(Sprite):
         base_rocket = self.col_rect.top
         if base_rocket > settings.disp_size[1]:
             self.kill() 
-           
-'''            
-class PowerUP(Sprite):    
-    def __init__(self, pos, size):         
-        super().__init__(size, pos, settings.surf_enemy['pows'], settings.sound_enemy['pows'])
-        
-        self.speed = [0,0]   # velocidade do raio     
-        self.time = 200                     
-        
-    def get(self):
-        self.sounds[0].play()
-                      
-    def update(self): 
-        self.time -= 1 
-        if self.time > 0: self.draw(settings)
-        else: self.kill()
-        
-
-class ShieldUP(Sprite):    
-    def __init__(self, pos, size):         
-        super().__init__(size, pos, settings.surf_enemy['shield'], settings.sound_enemy['pows'])
-        
-        self.speed = [0,0]   # velocidade do raio     
-        self.time = 300                     
-        
-    def get(self):
-        self.sounds[0].play()
-                      
-    def update(self): 
-        self.time -= 1 
-        if self.time > 0: self.draw(settings)
-        else: self.kill()
- '''       
+    

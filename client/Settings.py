@@ -29,8 +29,9 @@ class Settings:
 
         
         #client frame
-        self.hosts = ['192.168.0.107']
-        self.client = '192.168.0.107'
+        self.hosts = ['192.168.0.109']
+        self.client = '192.168.0.109'
+        self.client_socket = None
         self.frame = None
         self.frame_list = []
         self.max_buffer = 30
@@ -82,6 +83,7 @@ class Settings:
         self.time_level = 2_000
         self.luck = 10
         self.name = ''
+        self.name2 = ''
         self.pwd = ''
 
         # moving background

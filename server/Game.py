@@ -1,41 +1,53 @@
 from .Player import Player, Rocket
 from .Enemy import Asteroid, Mob, Boss
 from .Settings import settings
-from .Menu import *
-from .SQL import *
-from .Socket import *
+#from .Menu import *
+from .Menu import Basic_menu
+#from .SQL import *
+from .Socket_server import *
 import pygame
 import random
+import threading
 
 class Game: 
     def __init__(self):
         settings.load_resources()
-        
+                   
     def run(self):                
         menu = Basic_menu()
         select = menu.run()
         
         if select == 1:            
-            menu_login()
+            #menu_login()
             self.new_game()
         elif select == 2: 
             settings.multiplayer = True
-            menu_login()                 
-            threading.Thread(target=self.get_message).start()  
-            menu_online()
-            self.client_message = Socket_client_message(settings.client, 4032)                        
-            self.new_game() 
+            #menu_login()   
+            #menu_online()            
+            settings.server_socket = AppServer("0.0.0.0", 5041)   
+            threading.Thread(target=self.server_thread).start()   
+            self.client_message = settings.server_socket 
+            while not self.client_message.conn: 
+                pos = settings.disp_size                
+                self.print_text('WAITING CLIENT CONNECTION...', (pos[0]/2),(pos[1]/2)-50, 'center') 
+                # mostrando na tela tudo o que foi desenhado
+                pygame.display.flip()
+                settings.clock.tick(settings.fps)
+            if self.client_message.conn:            
+                self.new_game()             
         elif select == 3:
-            run_menu()
-            if not settings.running:
-               self.new_game() 
+            #run_menu()
+            #if not settings.running:
+            #   self.new_game() 
+            pass
         elif select == 4:
             self.exit()
-            
-    def get_message(self):         
-        self.server_message = Socket_server_message('0.0.0.0', 4031)
-        self.server_message.receive_messages()
-       
+        
+        
+    def server_thread(self):
+        settings.server_socket.server_listen()
+    
+           
     def new_game (self):
         while True:                             # laço externo do game over
             # Configurando o começo do jogo.
@@ -51,8 +63,12 @@ class Game:
             self.level = 0                      # fator para velocidade aumentar
             self.level_check = False            # veficia nova atualização da velocidade
              
-            settings.hi_score = sql_request()
-            settings.name = str(sql_name().upper())
+            #settings.hi_score = sql_request()
+            #settings.name = str(sql_name().upper())
+            with open("hi_score.txt", "r") as arq:
+                score = int(arq.read())
+            settings.hi_score = score
+            settings.name = 'PLAYER 1'
                    
             pygame.mixer.music.play(-1, 0.0)    # colocando a música de fundo
             
@@ -63,9 +79,10 @@ class Game:
             
             #create player 2
             if settings.multiplayer: 
+                settings.name2 = 'PLAYER 2'
                 self.player2 = Player(type=2, socket=self.client_message)
                                     
-            #repetição principal
+            #repetição principal            
             self.main_loop()        # inicia novo jogo
             
             # Parando o jogo e mostrando a tela final.
@@ -137,11 +154,15 @@ class Game:
             # verifica fim de jogo com recorde
             if not settings.running and self.player.score > settings.hi_score:
                 settings.hi_score = self.player.score
-                sql_update(settings.hi_score)             
+                #sql_update(settings.hi_score)             
+                with open("hi_score.txt", "w") as arq:                        
+                    arq.write(str(settings.hi_score))
             if settings.multiplayer:                
                 if not settings.running and self.player2.score > settings.hi_score:
                     settings.hi_score = self.player2.score
-                    sql_update(settings.hi_score)
+                    #sql_update(settings.hi_score)
+                    with open("hi_score.txt", "w") as arq:                        
+                        arq.write(str(settings.hi_score))
                 
             # verifica nivel game
             self.check_level()
@@ -214,9 +235,10 @@ class Game:
                 self.exit()  
             if evento.type == pygame.KEYDOWN:
                 if evento.key == pygame.K_ESCAPE:                    
-                    run_menu()
-                    pygame.event.clear()
-                    return True                   
+                    #run_menu()
+                    #pygame.event.clear()
+                    #return True                   
+                    self.exit()
                 if evento.key == pygame.K_LEFT or evento.key == pygame.K_a:                    
                     self.player.teclas['esquerda'] = True
                 if evento.key == pygame.K_RIGHT or evento.key == pygame.K_d:
@@ -369,7 +391,7 @@ class Game:
         # Colocando as pontuações.
         self.print_text(settings.name, 10, 0, 'topLeft')
         self.print_text('' + str(self.player.score), 10, 40, 'topLeft')
-        self.print_text('HI SCORE: ' + str(settings.hi_score) +' '+ settings.name,
+        self.print_text('HI SCORE: ' + str(settings.hi_score),
                         settings.disp_size[0]/2, 20, 'center')
         if self.level == 0: lv=str(self.level+1)
         else: lv= str(self.level)
@@ -405,7 +427,7 @@ class Game:
         #player 2
         if settings.multiplayer: 
              # Colocando as pontuações.
-            self.print_text(settings.name, settings.disp_size[0]-10, 0, 'topRight')
+            self.print_text(settings.name2, settings.disp_size[0]-10, 0, 'topRight')
             self.print_text('' + str(self.player2.score), settings.disp_size[0]-10, 40, 'topRight')
                         
             #desenhando a vida da nave

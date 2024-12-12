@@ -3,7 +3,7 @@ from PIL import Image
 from .Settings import settings
 import pygame
 from .SQL import *
-from .Socket import *
+#from .Socket import *
 
 def set_tab1(w,h,tab):  
     frame = CTkFrame(master=tab, width=w, height=h, fg_color='#333333', corner_radius=3, border_width=2)
@@ -222,8 +222,8 @@ def online_entry(w,h):
         '''
         settings.host = str(entry1.get())
         settings.port = int(entry2.get())
-        client_conn = Socket_client(settings.host, settings.port)
-        client_conn.send('hi') 
+        '''client_conn = Socket_client(settings.host, settings.port)
+        client_conn.send('hi') '''
         
         #while not settings.TCP_buffer:
         #    pass
